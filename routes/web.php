@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ManufactureController;
 use App\Http\Controllers\UserController;
@@ -31,6 +32,14 @@ Route::middleware('auth')->group(function () {
             Route::post('/', 'store')->name('manufacture.store');
             Route::put('/{manufacture}', 'update')->name('manufacture.update');
             Route::delete('/{manufacture}', 'destroy')->name('manufacture.destroy');
+        });
+    });
+
+    Route::prefix('/email')->group(function () {
+        Route::controller(EmailController::class)->group(function () {
+            Route::post('/', 'store')->name('email.store');
+            Route::put('/{email}', 'update')->name('email.update');
+            Route::delete('/{email}', 'destroy')->name('email.destroy');
         });
     });
 });
