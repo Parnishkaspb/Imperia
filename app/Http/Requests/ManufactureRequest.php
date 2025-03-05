@@ -11,7 +11,7 @@ class ManufactureRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class ManufactureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string'],
+            'web' => ['required', 'url'],
+            'adress_loading' => ['nullable', 'string'],
+            'note' => ['nullable', 'string'],
+            'nottypicalproduct'=> ['nullable', 'boolean'],
+            'checkmanufacture'=> ['nullable', 'boolean'],
+            'date_contract'=> ['nullable', 'boolean'],
+            'region'=> ['nullable', 'exists:federal_dists,id'],
+            'city'=> ['nullable', 'exists:federal_dists,id'],
         ];
     }
 }

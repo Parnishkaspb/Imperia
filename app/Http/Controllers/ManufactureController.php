@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ManufactureRequest;
 use App\Models\Email;
 use App\Models\federalDist;
 use App\Models\Manufacture;
@@ -22,18 +23,19 @@ class ManufactureController extends Controller
         return view('manufacture.show', compact('manufacture'));
     }
 
-    public function update(Request $request, Manufacture $manufacture){
+    public function update(ManufactureRequest $request, Manufacture $manufacture){
         $manufacture->update([
             'name' => $request->name,
             'web' => $request->web,
-            'adress_loading' => $request->adress_loading,
-            'note' => $request->note,
-            'nottypicalproduct'=> $request->nottypicalproduct,
-            'checkmanufacture'=> $request->checkmanufacture,
-            'date_contract'=> $request->date_contract,
-            'region'=> $request->region,
-            'city'=> $request->city,
+//            'adress_loading' => $request->adress_loading,
+//            'note' => $request->note,
+//            'nottypicalproduct'=> $request->nottypicalproduct,
+//            'checkmanufacture'=> $request->checkmanufacture,
+//            'date_contract'=> $request->date_contract,
+//            'region'=> $request->region,
+//            'city'=> $request->city,
         ]);
+
         return redirect()->route('manufacture.show', $manufacture->id)->with('success', 'Пользователь успешно обновлен.');
     }
 
