@@ -7,6 +7,9 @@ use Illuminate\Validation\Rule;
 
 class EmailRequest extends FormRequest
 {
+//    public mixed $manufacture_id;
+//    public mixed $email;
+
     /**
      * Determine if the user is authorized to make this request.
      */

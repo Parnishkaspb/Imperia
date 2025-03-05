@@ -1,10 +1,6 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ManufactureController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\{AdminController, EmailController, LoginController, ManufactureController, UserController};
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckRole;
 
@@ -27,6 +23,8 @@ Route::middleware('auth')->group(function () {
         Route::controller(ManufactureController::class)->group(function () {
             Route::get('/', 'index')->name('manufacture.index');
             Route::get('/{manufacture}', 'show')->name('manufacture.show');
+
+            Route::get('/{manufacture}', 'fullInformation')->name('manufacture.fullInformation');
 
 
             Route::post('/', 'store')->name('manufacture.store');

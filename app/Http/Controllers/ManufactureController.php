@@ -7,6 +7,7 @@ use App\Models\Email;
 use App\Models\federalDist;
 use App\Models\Manufacture;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
@@ -23,19 +24,13 @@ class ManufactureController extends Controller
         return view('manufacture.show', compact('manufacture'));
     }
 
-    public function update(ManufactureRequest $request, Manufacture $manufacture){
-        $manufacture->update([
-            'name' => $request->name,
-            'web' => $request->web,
-//            'adress_loading' => $request->adress_loading,
-//            'note' => $request->note,
-//            'nottypicalproduct'=> $request->nottypicalproduct,
-//            'checkmanufacture'=> $request->checkmanufacture,
-//            'date_contract'=> $request->date_contract,
-//            'region'=> $request->region,
-//            'city'=> $request->city,
-        ]);
+    public function fullInformation(Manufacture $manufacture){
+        return view('manufacture.full', compact('manufacture'));
+    }
 
+    public function update(ManufactureRequest $request, Manufacture $manufacture){
+        $manufacture->update($request->validated());
+        Log::info(Auth::user()->name . ' отредактировал производителя ' . $manufacture->id);
         return redirect()->route('manufacture.show', $manufacture->id)->with('success', 'Пользователь успешно обновлен.');
     }
 
