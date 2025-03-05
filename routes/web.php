@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/', 'index')->name('manufacture.index');
             Route::get('/{manufacture}', 'show')->name('manufacture.show');
 
-            Route::get('/{manufacture}', 'fullInformation')->name('manufacture.fullInformation');
+            Route::get('/full/{manufacture}', 'fullInformation')->name('manufacture.fullInformation');
 
 
             Route::post('/', 'store')->name('manufacture.store');
