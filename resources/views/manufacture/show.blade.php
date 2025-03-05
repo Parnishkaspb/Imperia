@@ -41,14 +41,20 @@
         <div class="mb-3">
             @if(!empty($manufacture->emails))
                 @foreach($manufacture->emails as $email)
-                    <input type="email" name="email_{{ $email->id }}" value="{{ $email->name }}">
-                    <button class="btn btn-outline-danger" onclick="deleteEmail({{ $email->id }})">Удалить</button>
+                    <div class="email-container">
+                        <input type="email" name="email_{{ $email->id }}" value="{{ $email->name }}">
+                        <button class="btn btn-outline-danger" onclick="deleteEmail({{ $email->id }})">Удалить</button>
+                    </div>
                 @endforeach
-                <input type="email" name="email_{{$manufacture->emails->last() + 1}}" value="">
-                <button class="btn btn-warning" onclick="createEmail()"> Добавить </button>
+                <div class="email-container">
+                    <input type="email" name="email_new" value="">
+                    <button class="btn btn-warning" onclick="createEmail()">Добавить</button>
+                </div>
             @else
-                <input type="email" name="email_1" value="">
-                <button class="btn btn-warning" onclick="createEmail()"> Добавить </button>
+                <div class="email-container">
+                    <input type="email" name="email_new" value="">
+                    <button class="btn btn-warning" onclick="createEmail()">Добавить</button>
+                </div>
             @endif
         </div>
 
@@ -58,7 +64,6 @@
 
     <script>
         $(document).ready(function() {
-            let emailsArray =
             function deleteEmail(email_id) {
                 if (confirm("Вы точно хотите удалить почту?")) {
                     $.ajax({
@@ -68,20 +73,51 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            $(`input[name="email_${email_id}"]`).next('button').remove();
-                            $(`input[name="email_${email_id}"]`).remove();
+                            $(`input[name="email_${email_id}"]`).closest('.email-container').remove();
                             alert(response.message);
                         },
                         error: function(xhr) {
-                            alert('Error deleting email: ' + xhr.responseJSON.message);
+                            alert('Ошибка при удалении почты: ' + xhr.responseJSON.message);
                         }
                     });
                 }
             }
 
-            const createEmail = () = {
 
-            };
+            function createEmail() {
+                const newEmailValue = $('input[name="email_new"]').val();
+                if (!newEmailValue) {
+                    alert("Поле email не может быть пустым!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/email',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        email: newEmailValue,
+                        manufacture_id: {{$manufacture->id}}
+                    },
+                    success: function(response) {
+                        $('input[name="email_new"]').val('');
+
+                        $('.mb-3').append(`
+                            <div class="email-container">
+                                <input type="email" name="email_${response.email.id}" value="${response.email.name}">
+                                <button class="btn btn-outline-danger" onclick="deleteEmail(${response.email.id})">Удалить</button>
+                            </div>
+                        `);
+
+                        alert(response.message);
+                    },
+                    error: function(xhr) {
+                        alert('Ошибка при добавлении почты: ' + xhr.responseJSON.message);
+                    }
+                });
+            }
         });
     </script>
 @endsection
