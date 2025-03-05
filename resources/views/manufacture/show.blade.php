@@ -39,21 +39,22 @@
         </div>
 
         <div class="mb-3">
+            <label for="" class="form-label">Почта</label>
             @if(!empty($manufacture->emails))
                 @foreach($manufacture->emails as $email)
                     <div class="email-container">
-                        <input type="email" name="email_{{ $email->id }}" value="{{ $email->name }}">
-                        <button class="btn btn-outline-danger" onclick="deleteEmail({{ $email->id }})">Удалить</button>
+                        <input type="email" name="email_{{ $email->id }}" value="{{ $email->name }}" class="form-control">
+                        <button class="mt-1 btn btn-outline-danger" onclick="deleteEmail({{ $email->id }})">Удалить</button>
                     </div>
                 @endforeach
                 <div class="email-container">
-                    <input type="email" name="email_new" value="">
-                    <button class="btn btn-warning" onclick="createEmail()">Добавить</button>
+                    <input type="email" name="email_new" value="" class="form-control">
+                    <button class="mt-1 btn btn-warning" onclick="createEmail()">Добавить</button>
                 </div>
             @else
                 <div class="email-container">
-                    <input type="email" name="email_new" value="">
-                    <button class="btn btn-warning" onclick="createEmail()">Добавить</button>
+                    <input type="email" name="email_new" value="" class="form-control">
+                    <button class="mt-1 btn btn-warning" onclick="createEmail()">Добавить</button>
                 </div>
             @endif
         </div>
@@ -92,7 +93,7 @@
                 }
 
                 $.ajax({
-                    url: '/email',
+                    url: '/email/',
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
