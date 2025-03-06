@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckRole;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/login', function (){
@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
 
             Route::post('/', 'store')->name('manufacture.store');
             Route::put('/{manufacture}', 'update')->name('manufacture.update');
+            Route::put('/boolean/{manufacture}', 'updateBoolean')->name('manufacture.boolean');
             Route::delete('/{manufacture}', 'destroy')->name('manufacture.destroy');
         });
     });
@@ -59,7 +60,6 @@ Route::middleware(['auth', CheckRole::class . ':1'])->group(function () {
         });
     });
 });
-
 
 
 //Route::middleware(['auth', 'role:2'])->group(function () {
