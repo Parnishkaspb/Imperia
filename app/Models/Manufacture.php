@@ -21,6 +21,8 @@ class Manufacture extends Model
         'date_contract',
         'region',
         'city',
+        'inn',
+        'price'
     ];
 
     public function fedDistRegion(): BelongsTo
@@ -36,5 +38,15 @@ class Manufacture extends Model
     public function emails(): HasMany
     {
         return $this->hasMany(Email::class, 'manufacture_id', 'id');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(ManufactureProduct::class, 'manufacture_id', 'id');
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(ManufactureCategory::class, 'manufacture_id', 'id');
     }
 }

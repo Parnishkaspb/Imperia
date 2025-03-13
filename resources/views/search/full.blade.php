@@ -37,7 +37,10 @@
             <thead>
                 <tr>
                     <th>
-                        <a class="btn btn-outline-primary add-categories" style="width: 190px;" href="{{ route('manufacture.add', ['manufacture' => $manufacture->id, 'section' => 1]) }}"> Добавить категорию </a>
+                        <button type="button" class="btn btn-outline-primary add-categories" style="width: 190px;"
+                                data-id="0">
+                            Добавить категорию
+                        </button>
                     </th>
                     <th>
                         <button type="button" class="btn btn-outline-primary  show-categories" style="width: 190px;"
@@ -50,7 +53,10 @@
             <tbody>
             <tr>
                 <td>
-                    <a class="btn btn-outline-primary add-products" style="width: 190px;" href="{{ route('manufacture.add', ['manufacture' => $manufacture->id, 'section' => 2]) }}"> Добавить продукцию </a>
+                    <button type="button" class="btn btn-outline-primary add-products" style="width: 190px;"
+                            data-id="0">
+                        Добавить продукцию
+                    </button>
                 </td>
                 <td>
                     <button type="button" class="btn btn-outline-primary show-products" style="width: 190px;"
@@ -241,7 +247,7 @@
                 if ($('#products').is(':visible')) {
                     $('#products').hide();
                     return
-                }
+                } // Если уже открыто, ничего не делать
                 $('#categories').fadeOut(200, function () {
                     $('#products').fadeIn(200);
                 });

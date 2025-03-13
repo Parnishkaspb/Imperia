@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EmailRequest;
 use App\Models\Email;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -27,6 +28,21 @@ class EmailController extends Controller
             Log::error(Auth::user()->name . ' пытался добавить почту к производителю ('. $request->manufacture_id .')\nОшибка: '. $e->getMessage());
             return response()->json(['success' => false, 'error' => $e->getMessage()], $e->getCode());
         }
+    }
+
+    public function check(Request $request)
+    {
+        $email = Email::where('email', $request->email)->exists();
+        if ($email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Такая почта уже существует у другого производителя!'
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+        ],  200);
     }
 
     public function update (EmailRequest $request, Email $email): \Illuminate\Http\JsonResponse

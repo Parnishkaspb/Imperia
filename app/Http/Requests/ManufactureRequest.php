@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ManufactureRequest extends FormRequest
 {
@@ -21,9 +22,13 @@ class ManufactureRequest extends FormRequest
      */
     public function rules(): array
     {
+        $manufacture = $this->route('manufacture');
+
         return [
             'name' => ['required', 'string'],
-            'web' => ['required', 'url'],
+            'web' => ['required', 'string',
+                Rule::unique('manufactures')->ignore($manufacture ? $manufacture->id : null),
+                ],
             'adress_loading' => ['nullable', 'string'],
             'note' => ['nullable', 'string'],
             'nottypicalproduct'=> ['nullable', 'boolean'],
@@ -31,6 +36,11 @@ class ManufactureRequest extends FormRequest
             'date_contract'=> ['nullable', 'boolean'],
             'region'=> ['nullable', 'exists:federal_dists,id'],
             'city'=> ['nullable', 'exists:federal_dists,id'],
+            'inn'=> [
+                'nullable',
+                'integer',
+                Rule::unique('manufactures')->ignore($manufacture ? $manufacture->id : null),],
+            'price'=> ['nullable', 'string'],
         ];
     }
 }

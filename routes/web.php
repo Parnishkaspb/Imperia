@@ -1,6 +1,11 @@
 <?php
 
-use App\Http\Controllers\{AdminController, EmailController, LoginController, ManufactureController, UserController};
+use App\Http\Controllers\{AdminController,
+    EmailController,
+    federalDistController,
+    LoginController,
+    ManufactureController,
+    UserController};
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckRole;
 
@@ -26,6 +31,7 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/info/{manufacture}', 'fullInformation')->name('manufacture.fullInformation');
 
+            Route::get('/add/{manufacture}/{section}', 'addCategoryOrProduct')->name('manufacture.add');
 
             Route::post('/', 'store')->name('manufacture.store');
             Route::put('/{manufacture}', 'update')->name('manufacture.update');
@@ -37,8 +43,15 @@ Route::middleware('auth')->group(function () {
     Route::prefix('/email')->group(function () {
         Route::controller(EmailController::class)->group(function () {
             Route::post('/', 'store')->name('email.store');
+            Route::post('/checked', 'check')->name('email.check');
             Route::put('/{email}', 'update')->name('email.update');
             Route::delete('/{email}', 'destroy')->name('email.destroy');
+        });
+    });
+
+    Route::prefix('/federalDist')->group(function () {
+        Route::controller(federalDistController::class)->group(function () {
+            Route::get('/{parent_id}', 'show')->name('federalDist.show');
         });
     });
 });

@@ -124,9 +124,5 @@
                 });
             });
         });
-
-
-
     </script>
 @endsection
-
