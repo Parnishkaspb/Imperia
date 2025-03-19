@@ -10,131 +10,330 @@
         </div>
     @endif
 
-    <table class="table table-hover">
-        <thead class="table-dark">
-        <tr>
-            @foreach($ths as $th)
-                <th> {{ $th }}</th>
-            @endforeach
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($items as $item)
+    <style>
+        /* Общий контейнер для поиска */
+        .search-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            padding: 10px;
+            /*border-bottom: 1px solid #ccc;*/
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Поле ввода */
+        .search-form input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Кнопка */
+        .search-form button {
+            background-color: #ffc107;
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .table-container {
+            max-height: 700px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 1200px; /* Должно совпадать с поисковой строкой */
+            margin: auto;
+        }
+
+        .table thead {
+            position: sticky;
+            top: 0;
+            z-index: 9;
+            background-color: #343a40;
+        }
+
+        .table thead th {
+            background-color: #343a40 !important;
+            color: white !important;
+            padding: 10px;
+        }
+
+        .divForButton {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            /*padding: 10px;*/
+            /*border-bottom: 1px solid #ccc;*/
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+
+    <!-- Фиксированное поле поиска -->
+    <div class="divForButton">
+        <button class="btn btn-info mb-3" id="buttonModal" data-name="{{isset($type) ? "category" : "product"}}" data-bs-toggle="modal" data-bs-target="#showCacheData">
+            {{$count = count(Cache::get(Auth::id() . "_" . $manufacture_id . "_" . (isset($type) ? "category" : "product"), []))}}
+            Просмотр данных. {{ $count > 0 ? "Кол-во: " . $count : "" }}
+        </button>
+    </div>
+    <div class="search-container">
+        <div class="search-form">
+            @csrf
+            <input type="text" name="find" id="find" placeholder="{{$placeholder}}">
+            <button type="button" class="btn btn-warning ms-2 " id="search">Искать</button>
+        </div>
+    </div>
+
+    <!-- Контейнер с прокруткой для таблицы -->
+    <div class="table-container">
+        <table class="table table-hover" id="table">
+            <thead class="table-dark">
             <tr>
-                <td><button id="{{ $item['id'] }}" > Добавить  </button></td>
-                <td> {{ $item['name'] }} </td>
-
-                @if(!isset($type))
-                    <td> {{ $item['width'] }} </td>
-                    <td> {{ $item['height'] }} </td>
-                    <td> {{ $item['length'] }} </td>
-                    <td> {{ $item['weight'] }} </td>
-                    <td> {{ $item['category'] }} </td>
-                @endif
+                @foreach($ths as $th)
+                    <th> {{ $th }}</th>
+                @endforeach
             </tr>
-        @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            @foreach($items as $item)
+                <tr id="tr_{{$item['id']}}">
+                    <td>
+                        <button class="btn btn-primary" id="addsmt" data-id="{{ $item['id'] }}" data-name="{{isset($type) ? "category" : "product"}}"> Добавить  </button>
+                    </td>
+                    <td> {{ $item['name'] }} </td>
 
-{{--    <div class="d-flex justify-content-center mt-3">--}}
-{{--        {{ $items->links('pagination::bootstrap-5') }}--}}
-{{--    </div>--}}
+                    @if(!isset($type))
+                        <td> {{ $item['width'] }} </td>
+                        <td> {{ $item['height'] }} </td>
+                        <td> {{ $item['length'] }} </td>
+                        <td> {{ $item['weight'] }} </td>
+                        <td> {{ $item['category'] }} </td>
+                    @endif
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
 
 
-    <!-- Модальное окно для добавления нового производителя -->
-    <div class="modal fade @if ($errors->any()) show d-block @endif" id="createNewManufacture" tabindex="-1" aria-labelledby="createNewManufactureLabel" aria-hidden="true">
+    <div class="modal fade" id="showCacheData" tabindex="-1" aria-labelledby="showCacheDataLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="createNewManufacture">Добавление нового производителя</h5>
+                    <button class="btn btn-primary" id="addToManufacture" data-name="{{isset($type) ? "category" : "product"}}"><h5 class="modal-title">Добавить к производителю</h5></button>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if ($errors->any())
-                        @foreach ($errors->all() as $error)
-                            <div class="alert alert-danger">
-                                {{ $error }}
-                            </div>
-                        @endforeach
-                    @endif
-                    <form method="POST" action="{{ route('user.store') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Имя</label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name') }}" required>
-                            @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="surname" class="form-label">Фамилия</label>
-                            <input type="text" name="surname" class="form-control" value="{{ old('surname') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patronymic" class="form-label">Отчество</label>
-                            <input type="text" name="patronymic" class="form-control" value="{{ old('patronymic') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="role_id" class="form-label">Роль</label>
-                            <select name="role_id" class="form-select" required>
-{{--                                @foreach($roles as $role)--}}
-{{--                                    <option value="{{ $role->id }}" @if(old('role_id') == $role->id) selected @endif>--}}
-{{--                                        {{ $role->name }}--}}
-{{--                                    </option>--}}
-{{--                                @endforeach--}}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                                   value="{{ old('email') }}" required>
-                            @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Подтвердите пароль</label>
-                            <input type="password" name="password_confirmation"
-                                   class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary w-100">Создать</button>
-                    </form>
+                    <table class="table table-hover" id="tableModal"></table>
                 </div>
             </div>
         </div>
     </div>
 
+
     <script>
         $(document).ready(function() {
-            $('[data-bs-toggle="tooltip"]').tooltip({
-                trigger: 'manual',
-                placement: 'top'
-            }).on('click', function () {
-                let _this = $(this);
-                if (_this.attr('data-tooltip-shown') === 'true') {
-                    _this.tooltip('hide').attr('data-tooltip-shown', 'false');
-                } else {
-                    _this.tooltip('show').attr('data-tooltip-shown', 'true');
-                    $('.tooltip').on('click', function () {
-                        _this.tooltip('hide').attr('data-tooltip-shown', 'false');
-                    });
+            const csrfToken = $('input[name="_token"]').val();
+
+            $('#search').click(function() {
+                let find = $('#find').val().trim();
+
+                if (!find) {
+                    alert("Поле поиска не может быть пустым!");
+                    return;
                 }
+
+                $.ajax({
+                    url: '{{$route}}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        find: find,
+                    },
+                    success: function(response) {
+                        let table = `<thead class="table-dark"><tr>`;
+                        response.ths.forEach(th => {
+                            table += `<th>${th}</th>`;
+                        });
+                        table += `</tr></thead><tbody>`;
+
+                        response.items.forEach(item => {
+                            table += `<tr id="tr_${item.id}">
+                        <td><button class="btn btn-primary" id="addsmt" data-id="${item.id}" data-name="${response.type ? 'category' : 'product'}">Добавить</button></td>
+                        <td>${item.name}</td>`;
+
+                            if (!response.type) {
+                                table += `
+                        <td>${item.width}</td>
+                        <td>${item.height}</td>
+                        <td>${item.length}</td>
+                        <td>${item.weight}</td>
+                        <td>${item.category}</td>`;
+                            }
+
+                            table += `</tr>`;
+                        });
+
+                        table += `</tbody>`;
+
+                        $('#table').html(table);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
             });
+
+            $(document).on('click', '#addsmt', function() {
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+
+                $.ajax({
+                    url: '/manufacture/cache/'+{{$manufacture_id}},
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        id: id,
+                        name: name
+                    },
+                    success: function(response) {
+                        $("#tr_" + id).remove();
+                        console.log(response.data.length);
+
+                        $('#buttonModal').html('Просмотр данных. Кол-во: ' + response.data.length);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
+            });
+
+            $(document).on('click', '#buttonModal', function (){
+                let name = $(this).data('name');
+
+                $.ajax({
+                    url: '/manufacture/cache/show/'+{{$manufacture_id}},
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        name: name
+                    },
+                    success: function(response) {
+                        let table = `<thead class="table-dark"><tr>`;
+                        response.ths.forEach(th => {
+                            table += `<th>${th}</th>`;
+                        });
+                        table += `</tr></thead><tbody>`;
+
+                        response.items.forEach(item => {
+                            table += `<tr id="tr_delete_${item.id}">
+                        <td><button class="btn btn-danger" id="deletesmt" data-id="${item.id}" data-name="${response.type ? 'category' : 'product'}">Удалить</button></td>
+                        <td>${item.name}</td>`;
+
+                            if (!response.type) {
+                                table += `<td>${item.category}</td>`;
+                            }
+
+                            table += `</tr>`;
+                        });
+
+                        table += `</tbody>`;
+
+                        $('#tableModal').html(table);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
+
+            })
+
+            $(document).on('click', '#deletesmt', function() {
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+
+                $.ajax({
+                    url: '/manufacture/cache/'+{{$manufacture_id}},
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        id: id,
+                        name: name
+                    },
+                    success: function(response) {
+                        $("#tr_delete_" + id).remove();
+
+                        $('#buttonModal').html('Просмотр данных. Кол-во: ' + response.countData);
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
+            });
+
+            $(document).on('click', '#addToManufacture', function() {
+                let name = $(this).data('name');
+
+                $.ajax({
+                    url: '/manufacture/addPC/' + name + '/' + {{$manufacture_id}},
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        name: name
+                    },
+                    success: function(response){
+                        alert(response.message);
+                        location.href = response.route;
+                    },
+                    error: function(xhr) {
+                        let httpCode = xhr.status;
+
+                        let errorMessage = 'Произошла неизвестная ошибка';
+
+                        if (xhr.responseText) {
+                            try {
+                                let response = JSON.parse(xhr.responseText);
+                                errorMessage = response.message || errorMessage;
+                            } catch (e) {
+                                console.error("Ошибка парсинга JSON:", e);
+                            }
+                        }
+
+                        console.log("Ошибка:", errorMessage);
+                        alert(`Ошибка ${httpCode}: ${errorMessage}`);
+                    }
+                });
+            });
+
         });
+
     </script>
 @endsection

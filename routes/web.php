@@ -4,6 +4,7 @@ use App\Http\Controllers\{AdminController,
     EmailController,
     federalDistController,
     LoginController,
+    ManufactureCategoryProductsController,
     ManufactureController,
     UserController};
 use Illuminate\Support\Facades\Route;
@@ -33,10 +34,30 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/add/{manufacture}/{section}', 'addCategoryOrProduct')->name('manufacture.add');
 
+            Route::post('/add/rMC/{manufacture}', 'CategoriesView');
+            Route::post('/add/rMP/{manufacture}', 'ProductsView');
+
             Route::post('/', 'store')->name('manufacture.store');
             Route::put('/{manufacture}', 'update')->name('manufacture.update');
             Route::put('/boolean/{manufacture}', 'updateBoolean')->name('manufacture.boolean');
             Route::delete('/{manufacture}', 'destroy')->name('manufacture.destroy');
+
+            Route::prefix('/cache')->group(function () {
+                Route::post('/{manufacture_id}', 'createCache')->name('manufacture.cache.create');
+                Route::post('/show/{manufacture_id}', 'getCache')->name('manufacture.cache.get');
+                Route::delete('/{manufacture_id}', 'deleteCache')->name('manufacture.cache.delete');
+            });
+        });
+
+        Route::controller(ManufactureCategoryProductsController::class)->group(function () {
+            Route::post('/addPC/category/{manufacture}', 'manufactureCategoryStore');
+            Route::post('/addPC/product/{manufacture}', 'manufactureProductStore');
+
+            Route::put('/updatePC/{id}/{name}', 'manufacturePCUpdate');
+            Route::put('/updateComment/{id}', 'manufactureUpdateComment');
+
+
+            Route::delete('/delete/{delete_id}/{name}', 'manufacturePCDelete')->name('manufacture.pc.delete');
         });
     });
 

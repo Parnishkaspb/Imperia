@@ -10,6 +10,9 @@
         </div>
     @endif
 
+    <a href="/manufacture" class="btn btn-outline-warning w-100"> Назад </a>
+
+
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -41,6 +44,14 @@
         </div>
 
         <div class="mb-3">
+            <label for="inn" class="form-label">ИНН</label>
+            <input type="number" min="0" name="inn" class="form-control @error('inn') is-invalid @enderror" value="{{ old('inn', $manufacture->inn) }}">
+            @error('inn')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
             <label class="form-label">Email-адреса</label>
             <div id="email-list">
                 @foreach($manufacture->emails as $email)
@@ -56,8 +67,60 @@
             </div>
         </div>
 
+        <div class="mb-3">
+            <label for="adress_loading" class="form-label">Адрес погрузки</label>
+            <textarea name="adress_loading" class="form-control @error('adress_loading') is-invalid @enderror" >
+                                {{ old('adress_loading', $manufacture->adress_loading)}}
+                            </textarea>
+            @error('inn')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+
+{{--        <div class="mb-3">--}}
+{{--            <label for="dist" class="form-label">Федеральный округ</label>--}}
+{{--            <select id="dist" name="dist" class="form-control"></select>--}}
+{{--        </div>--}}
+{{--        <div class="mb-3">--}}
+{{--            <label for="region" class="form-label">Регион</label>--}}
+{{--            <select id="region" name="region" class="form-control" required></select>--}}
+{{--        </div>--}}
+{{--        <div class="mb-3">--}}
+{{--            <label for="city" class="form-label">Город</label>--}}
+{{--            <select id="city" name="city" class="form-control"></select>--}}
+{{--        </div>--}}
+
+        <div class="mb-3">
+            <label for="note" class="form-label">Заметки</label>
+            <input type="text" name="note" class="form-control @error('note') is-invalid @enderror" value="{{ old('note', $manufacture->note)}}">
+            @error('note')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="price" class="form-label">Ссылка на цены</label>
+            <input type="text" name="price" class="form-control @error('price') is-invalid @enderror" value="{{ old('price', $manufacture->price)}}">
+            @error('price')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+
+
+        <div class="mb-3">
+            <input type="checkbox" id="nottypicalproduct" name="nottypicalproduct" class="form-check-input @error('nottypicalproduct') is-invalid @enderror"
+                   value="1" {{ old('nottypicalproduct', $manufacture->nottypicalproduct) ? 'checked' : '' }}>
+            <label for="nottypicalproduct" class="form-check-label">Не типовая продукция</label>
+            @error('nottypicalproduct')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
         <button type="submit" class="btn btn-outline-primary w-100">Редактировать</button>
     </form>
+
 
     <script>
         $(document).ready(function() {

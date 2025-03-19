@@ -7,10 +7,13 @@ use App\Models\Category;
 use App\Models\Manufacture;
 use App\Models\ManufactureCategory;
 use App\Models\Product;
+use \Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
+
 
 class ManufactureController extends Controller
 {
@@ -74,11 +77,87 @@ class ManufactureController extends Controller
     private function prepareCategoriesView(Manufacture $manufacture)
     {
         $ths = ['Добавить', 'Категория'];
+        $placeholder = "Введите категорию";
         $manufacture->load('categories');
-        $categoryIDs = $manufacture->categories->pluck('category_id')->toArray();
+
+        $whereNotInIDs = $manufacture->categories->pluck('category_id')->toArray();
+
+        $cacheKey = Auth::user()->id . '_' . $manufacture->id . '_' . 'category';
+        if (Cache::get($cacheKey)){
+            $cacheIDs = Cache::get($cacheKey);
+            $whereNotInIDs = [...$whereNotInIDs, ...$cacheIDs];
+        }
 
         $items = Category::select(['id', 'name'])
-            ->whereNotIn('id', $categoryIDs)
+            ->whereNotIn('id', $whereNotInIDs)
+            ->where('id', '!=', 1)
+            ->where('parentid', '!=', 1)
+            ->limit(150)
+            ->get()
+            ->map(fn($item) => ['id' => $item->id, 'name' => $item->name])
+            ->toArray();
+
+        $type = 'Category';
+
+        $route = '/manufacture/add/rMC/'.$manufacture->id;
+        $manufacture_id = $manufacture->id;
+
+        return view('manufacture.add', compact('ths', 'items', 'type', 'placeholder', 'route', 'manufacture_id'));
+    }
+
+    private function prepareProductsView(Manufacture $manufacture)
+    {
+        $ths = ['Добавить', 'Название', 'Длина', 'Ширина', 'Высота', 'Масса', 'Категория'];
+        $placeholder = "Введите продукцию";
+        $route = '/manufacture/add/rMP/'.$manufacture->id;
+
+        $manufacture->load('products');
+        $whereNotInIDs = $manufacture->products->pluck('product_id')->toArray();
+
+        $cacheKey = Auth::id() . '_' . $manufacture->id . '_' . 'product';
+        if (Cache::has($cacheKey)){
+            $cacheIDs = Cache::get($cacheKey);
+            $whereNotInIDs = [...$whereNotInIDs, ...$cacheIDs];
+        }
+
+        $items = Product::whereNotIn('id', $whereNotInIDs)
+            ->with('category')
+            ->limit(150)
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'width' => $item->width,
+                'height' => $item->height,
+                'length' => $item->length,
+                'weight' => $item->weight,
+                'category' => $item->category?->name,
+            ])
+            ->toArray();
+
+        $manufacture_id = $manufacture->id;
+
+        return view('manufacture.add', compact('ths', 'items', 'placeholder', 'route', 'manufacture_id'));
+    }
+
+    public function CategoriesView(Request $request, Manufacture $manufacture)
+    {
+        $namecategory = $request->find;
+        $namecategory = trim($namecategory);
+        $namecategory = preg_replace('/[^a-zA-Zа-яА-Я0-9]/u', '', $namecategory);
+
+        $ths = ['Добавить', 'Категория'];
+        $manufacture->load('categories');
+        $whereNotInIDs = $manufacture->categories->pluck('category_id')->toArray();
+
+        $cacheKey = Auth::id() . '_' . $manufacture->id . '_' . 'category';
+        if (Cache::get($cacheKey)){
+            $cacheIDs = Cache::get($cacheKey);
+            $whereNotInIDs = [...$whereNotInIDs, ...$cacheIDs];
+        }
+
+        $items = Category::select(['id', 'name'])->where('namewithout', 'LIKE', "%{$namecategory}%")
+            ->whereNotIn('id', $whereNotInIDs)
             ->where('id', '!=', 1)
             ->where('parentid', '!=', 1)
             ->get()
@@ -87,16 +166,33 @@ class ManufactureController extends Controller
 
         $type = 'Category';
 
-        return view('manufacture.add', compact('ths', 'items', 'type'));
+
+        return response()->json([
+            'ths' => $ths,
+            'items' => $items,
+            'type' => $type,
+        ]);
     }
 
-    private function prepareProductsView(Manufacture $manufacture)
+    public function ProductsView(Request $request, Manufacture $manufacture)
     {
+        $find = $request->find;
+        $find = trim($find);
+        $find = preg_replace('/[^a-zA-Zа-яА-Я0-9\s]/u', '', $find);
+        $find = preg_replace('/\s+/', ' ', $find);
+
         $ths = ['Добавить', 'Название', 'Длина', 'Ширина', 'Высота', 'Масса', 'Категория'];
         $manufacture->load('products');
-        $productIDs = $manufacture->products->pluck('product_id')->toArray();
+        $whereNotInIDs = $manufacture->products->pluck('product_id')->toArray();
 
-        $items = Product::whereNotIn('id', $productIDs)
+        $cacheKey = Auth::id() . '_' . $manufacture->id . '_' . 'product';
+        if (Cache::has($cacheKey)){
+            $cacheIDs = Cache::get($cacheKey);
+            $whereNotInIDs = [...$whereNotInIDs, ...$cacheIDs];
+        }
+
+        $items = Product::whereNotIn('id', $whereNotInIDs)
+            ->where('nameS', 'LIKE', "%{$find}%")
             ->with('category')
             ->get()
             ->map(fn($item) => [
@@ -110,7 +206,10 @@ class ManufactureController extends Controller
             ])
             ->toArray();
 
-        return view('manufacture.add', compact('ths', 'items'));
+        return response()->json([
+            'ths' => $ths,
+            'items' => $items,
+        ]);
     }
 
     public function store(ManufactureRequest $request)
@@ -140,6 +239,85 @@ class ManufactureController extends Controller
             DB::rollBack();
             Log::error($e->getMessage());
         }
+    }
+
+    public function createCache(Request $request, $manufacture_id)
+    {
+        $id = $request->id;
+        $name = $request->name;
+        $key = Auth::id() . '_' . $manufacture_id . '_' . $name;
+
+        $existingData = Cache::get($key, []);
+
+        if (!in_array($id, $existingData)) {
+            $existingData[] = (int) $id;
+            Cache::put($key, $existingData, 600);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Кэш обновлен',
+            'data' => Cache::get($key),
+        ], Response::HTTP_ACCEPTED);
+    }
+
+    public function getCache(Request $request, $manufacture_id)
+    {
+        $name = $request->name;
+        $key = Auth::id() . '_' . $manufacture_id . '_' . $name;
+
+        if ($name === 'category'){
+            $data = Category::select(['id', 'name'])->whereIn('id', Cache::get($key, []))->get();
+            $ths = ['Удалить', 'Категория'];
+            $type = 'Category';
+
+            $return = [
+                'items' => $data,
+                'ths' => $ths,
+                'type' => $type,
+            ];
+
+        } else {
+            $ths = ['Добавить', 'Название', 'Категория'];
+            $data = Product::whereIn('id', Cache::get($key, []))
+                ->with('category')
+                ->get()
+                ->map(fn($item) => [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'category' => $item->category?->name,
+                ])
+                ->toArray();
+
+            $return = [
+                'items' => $data,
+                'ths' => $ths,
+            ];
+        }
+
+        return response()->json($return, Response::HTTP_ACCEPTED);
+    }
+
+    public function deleteCache(Request $request, $manufacture_id)
+    {
+        $name = $request->name;
+        $deleteID = $request->id;
+        $key = Auth::id() . '_' . $manufacture_id . '_' . $name;
+
+        $existingData = Cache::get($key, []);
+
+        if (is_array($existingData)) {
+            $existingData = array_filter($existingData, function ($item) use ($deleteID) {
+                return $item !== $deleteID;
+            });
+
+            Cache::put($key, array_values($existingData));
+        }
+
+        return response()->json([
+            'message' => 'OK',
+            'countData'  => count($existingData)
+        ], Response::HTTP_ACCEPTED);
     }
 
 }

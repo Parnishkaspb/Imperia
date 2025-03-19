@@ -12,6 +12,8 @@ class ManufactureCategory extends Model
     protected $fillable = [
         'manufacture_id',
         'category_id',
+        'likethiscategory',
+        'comment',
     ];
 
     public function category(): BelongsTo

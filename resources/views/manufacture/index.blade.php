@@ -163,6 +163,17 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="adress_loading" class="form-label">Адрес погрузки</label>
+                            <textarea name="adress_loading" class="form-control @error('adress_loading') is-invalid @enderror" >
+                                {{ old('adress_loading')}}
+                            </textarea>
+                            @error('adress_loading')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+
+                        <div class="mb-3">
                             <label for="dist" class="form-label">Федеральный округ</label>
                             <select id="dist" name="dist" class="form-control"></select>
                         </div>
@@ -175,6 +186,21 @@
                             <select id="city" name="city" class="form-control"></select>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="note" class="form-label">Заметки</label>
+                            <input type="text" name="note" class="form-control @error('note') is-invalid @enderror" value="{{ old('note')}}">
+                            @error('note')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Ссылка на цены</label>
+                            <input type="text" name="price" class="form-control @error('price') is-invalid @enderror" value="{{ old('price')}}">
+                            @error('price')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
                         <div class="mb-3">
                             <input type="checkbox" id="nottypicalproduct" name="nottypicalproduct" class="form-check-input @error('nottypicalproduct') is-invalid @enderror"

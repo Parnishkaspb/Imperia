@@ -71,7 +71,7 @@
             <tr>
                 <th>Название</th>
                 <th>Комментарий</th>
-                <th>Делает</th>
+                <th>Избранное</th>
                 <th>Действие</th>
             </tr>
             </thead>
@@ -79,16 +79,23 @@
             @foreach($manufacture->categories as $category)
                 <tr>
                     <td> {{ $category->category->name }} </td>
-                    <td> {{ $category->comment}} </td>
-                    <td> {{ $category->likethiscategory ? "Да" : "Нет" }} </td>
+                    <td id="td_comment_{{$category->id}}"> {{ $category->comment}} </td>
                     <td>
-                        <form method="POST" action="" class="d-inline"
-                              {{--                            <form method="POST" action="{{ route('manufacture_product.destroy', $product->id) }}" class="d-inline"--}}
+                        <button class="btn btn-sm btn-outline-{{($category->likethiscategory) ? "warning" : "danger" }}" id="yesno" data-name="category" data-id="{{$category->id}}">
+                            {{ $category->likethiscategory ? "Да" : "Нет" }}
+                        </button>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ route('manufacture.pc.delete', [$category->id, 'category']) }}" class="d-inline"
                               onsubmit="return confirm('Вы уверены, что хотите удалить эту связку?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
                         </form>
+
+                        <button class="btn btn-sm btn-outline-primary mb-3 mt-1" id="addComment" data-bs-toggle="modal" data-id="{{$category->id}}" data-bs-target="#createNewComment">
+                            Комментарий
+                        </button>
                     </td>
                 </tr>
             @endforeach
@@ -106,10 +113,13 @@
             @foreach($manufacture->products as $product)
                 <tr>
                     <td> {{ $product->product->name }} </td>
-                    <td> {{ $product->doit ? "Да" : "Нет" }} </td>
                     <td>
-                        <form method="POST" action="" class="d-inline"
-                              {{--                            <form method="POST" action="{{ route('manufacture_product.destroy', $product->id) }}" class="d-inline"--}}
+                        <button class="btn btn-sm btn-outline-{{($product->doit) ? "warning" : "danger" }}" id="yesno" data-name="product" data-id="{{$product->id}}">
+                            {{ $product->doit ? "Да" : "Нет" }}
+                        </button>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ route('manufacture.pc.delete', [$product->id, 'product']) }}" class="d-inline"
                               onsubmit="return confirm('Вы уверены, что хотите удалить эту связку?');">
                             @csrf
                             @method('DELETE')
@@ -194,6 +204,28 @@
         </div>
     </div>
 
+    <div class="modal fade @if ($errors->any()) show d-block @endif" id="createNewComment" tabindex="-1" aria-labelledby="createNewCommentLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать комментарий</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        @csrf
+                        <input type="hidden" id="newCommentID" value="">
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Комментарий</label>
+                            <textarea name="comment" class="form-control" id="newCommentText"></textarea>
+                        </div>
+                        <button id="addCommentModal" class="btn btn-outline-primary w-100">Создать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function() {
             let csrfToken = $('input[name="_token"]').val();
@@ -244,6 +276,59 @@
                 }
                 $('#categories').fadeOut(200, function () {
                     $('#products').fadeIn(200);
+                });
+            });
+
+            $(document).on('click', '#yesno', function() {
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+                let element = $(this);
+
+                $.ajax({
+                    url: '/manufacture/updatePC/'+ id +'/' + name,
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        element.text(response.name);
+                        element.attr('class', response.class);
+                    },
+                    error: function(xhr) {
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
+            });
+
+            $(document).on('click', '#addComment', function() {
+                let id = $(this).data('id');
+                $('#newCommentID').val(id);
+                let comment = $('#td_comment_' + id).text();
+                $('#newCommentText').text(comment);
+                console.log(comment);
+            });
+
+            $(document).on('click', '#addCommentModal', function() {
+                let id = $('#newCommentID').val();
+                let comment = $('#newCommentText').val();
+                console.log(id, comment);
+
+                $.ajax({
+                    url: '/manufacture/updateComment/'+ id,
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        comment: comment
+                    },
+                    success: function(response) {
+                        alert(response.message);
+                        $('#td_comment_' + id).text(comment)
+                    },
+                    error: function(xhr) {
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
                 });
             });
         });

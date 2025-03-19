@@ -12,6 +12,7 @@ class ManufactureProduct extends Model
     protected $fillable = [
         'manufacture_id',
         'product_id',
+        'doit',
     ];
 
     public function product(): BelongsTo
