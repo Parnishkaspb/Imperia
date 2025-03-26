@@ -75,6 +75,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/{parent_id}', 'show')->name('federalDist.show');
         });
     });
+
+//    Route::prefix('/search')->group(function () {
+//        Route::controller()->group(function () {});
+//    });
 });
 
 
