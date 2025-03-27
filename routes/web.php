@@ -6,6 +6,7 @@ use App\Http\Controllers\{AdminController,
     LoginController,
     ManufactureCategoryProductsController,
     ManufactureController,
+    SearchController,
     UserController};
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckRole;
@@ -76,9 +77,14 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-//    Route::prefix('/search')->group(function () {
-//        Route::controller()->group(function () {});
-//    });
+    Route::prefix('/search')->group(function () {
+        Route::controller(SearchController::class)->group(function () {
+            Route::get('/category', 'searchCategoryView')->name('search.category');
+            Route::post('/cfind', 'searchCategoryJson');
+
+            Route::get('/product', 'searchProductView')->name('search.product');
+        });
+    });
 });
 
 

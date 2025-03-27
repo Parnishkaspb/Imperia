@@ -29,14 +29,14 @@
                         </li>
                     @endif
 
-                    @if(in_array(Auth::user()->role_id, [1, 2]))
+                    @if(in_array(Auth::user()->role_id, [1, 2, 3]))
                         <li class="nav-item">
                             <a class="nav-link" href="/search/category">Поиск по категориям</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="/search/product">Поиск по продукции</a>
-                        </li>
+{{--                        <li class="nav-item">--}}
+{{--                            <a class="nav-link" href="/search/product">Поиск по продукции</a>--}}
+{{--                        </li>--}}
                     @endif
 
 
