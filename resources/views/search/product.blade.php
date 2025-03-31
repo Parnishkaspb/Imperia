@@ -1,258 +1,256 @@
 @extends('layouts.app')
 
-@section('title', $manufacture->name)
+@section('title', 'Поиск по продукции')
 
 @section('content')
-    <h4 class="text-center">
-        <a href="{{$manufacture->web}}" target="_blank"> {{$manufacture->name}} </a>
-    </h4>
 
-    <!-- Кнопки состояния производителя -->
-    <div class="d-flex justify-content-center align-items-center mb-3">
-        <button type="button" class="btn btn-outline-{{ $manufacture->checkmanufacture ? 'primary' : 'danger' }} ms-2 checkmanufacture"
-                data-id="{{ (bool) $manufacture->checkmanufacture }}">
-            {{ $manufacture->checkmanufacture ? 'Проверенный производитель' : 'Не работали с производителем' }}
-        </button>
+    <form action="{{ route('search.product') }}" method="GET" class="mb-4">
+        <div class="row g-3 align-items-end">
 
-        <button type="button" class="btn btn-outline-{{ $manufacture->date_contract ? 'primary' : 'danger' }} ms-2 date_contract"
-                data-id="{{ (bool) $manufacture->date_contract }}">
-            {{ $manufacture->date_contract ? 'Есть договор' : 'Нет договора' }}
-        </button>
-    </div>
+            {{-- Поле поиска --}}
+            <div class="col-md-4">
+                <label for="search" class="form-label">Поиск</label>
+                <input type="text" name="search" id="search" class="form-control"
+                       placeholder="Введите название или категорию..."
+                       value="{{ request('search') }}">
+            </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <button class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#createNewContactPerson">
-        Новое контактное лицо
-    </button>
-
-    <!-- Кнопки для открытия информации в производители -->
-    <div class="d-flex justify-content-center align-items-center mb-3">
-        <table>
-            <thead>
-                <tr>
-                    <th>
-                        <button type="button" class="btn btn-outline-primary add-categories" style="width: 190px;"
-                                data-id="0">
-                            Добавить категорию
-                        </button>
-                    </th>
-                    <th>
-                        <button type="button" class="btn btn-outline-primary  show-categories" style="width: 190px;"
-                                data-id="1">
-                            Просмотр категорий
-                        </button>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>
-                    <button type="button" class="btn btn-outline-primary add-products" style="width: 190px;"
-                            data-id="0">
-                        Добавить продукцию
-                    </button>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-outline-primary show-products" style="width: 190px;"
-                            data-id="1">
-                        Просмотр продукций
-                    </button>
-                </td>
-            </tr>
-
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Информация производителя -->
-    <div class="d-flex justify-content-center align-items-center mb-3">
-        <table class="table" style="width: 50%; display: none" id="categories">
-            <thead class="table-warning">
-            <tr>
-                <th>Название</th>
-                <th>Комментарий</th>
-                <th>Делает</th>
-                <th>Действие</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($manufacture->categories as $category)
-                <tr>
-                    <td> {{ $category->category->name }} </td>
-                    <td> {{ $category->comment}} </td>
-                    <td> {{ $category->likethiscategory ? "Да" : "Нет" }} </td>
-                    <td>
-                        <form method="POST" action="" class="d-inline"
-                              {{--                            <form method="POST" action="{{ route('manufacture_product.destroy', $product->id) }}" class="d-inline"--}}
-                              onsubmit="return confirm('Вы уверены, что хотите удалить эту связку?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-        <table class="table" style="width: 50%; display: none"  id="products">
-            <thead class="table-warning">
-            <tr>
-                <th>Название</th>
-                <th>Делает</th>
-                <th>Действие</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($manufacture->products as $product)
-                <tr>
-                    <td> {{ $product->product->name }} </td>
-                    <td> {{ $product->doit ? "Да" : "Нет" }} </td>
-                    <td>
-                        <form method="POST" action="" class="d-inline"
-                              {{--                            <form method="POST" action="{{ route('manufacture_product.destroy', $product->id) }}" class="d-inline"--}}
-                              onsubmit="return confirm('Вы уверены, что хотите удалить эту связку?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Модальное окно для добавления нового контактного лица -->
-    <div class="modal fade @if ($errors->any()) show d-block @endif" id="createNewContactPerson" tabindex="-1" aria-labelledby="createNewContactPersonLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Добавление нового производителя</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            {{-- Радиокнопки выбора типа поиска --}}
+            <div class="col-md-3">
+                <label class="form-label d-block">Тип поиска</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="type" id="byProduct" value="product"
+                        {{ request()->get('type', 'product') === 'product' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="byProduct">По названию</label>
                 </div>
-                <div class="modal-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <form method="POST" action="{{ route('user.store') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Имя</label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name') }}" required>
-                            @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="surname" class="form-label">Фамилия</label>
-                            <input type="text" name="surname" class="form-control" value="{{ old('surname') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patronymic" class="form-label">Отчество</label>
-                            <input type="text" name="patronymic" class="form-control" value="{{ old('patronymic') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="role_id" class="form-label">Роль</label>
-                            <select name="role_id" class="form-select" required>
-                                {{-- Опции ролей будут добавлены здесь --}}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                                   value="{{ old('email') }}" required>
-                            @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Подтвердите пароль</label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary w-100">Создать</button>
-                    </form>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="type" id="byCategory" value="category"
+                        {{ request()->get('type') === 'category' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="byCategory">По категории</label>
                 </div>
             </div>
+
+            <div class="col-md-2">
+                <label for="pagination" class="form-label">Кол-во на странице</label>
+                <select class="form-select" id="pagination" name="pagination">
+                    <option value="10" {{ request()->get('pagination') == '10' ? 'selected' : '' }}>10</option>
+                    <option value="30" {{ request()->get('pagination') == '30' ? 'selected' : '' }}>30</option>
+                    <option value="50" {{ request()->get('pagination') == '50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request()->get('pagination') == '100' ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+
+            {{-- Кнопки действий --}}
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-50">Поиск</button>
+                <a href="{{ route('search.product', ['pagination' => 30]) }}" class="btn btn-outline-secondary w-50">Сброс</a>
+            </div>
+
         </div>
+    </form>
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>Название</th>
+            <th>Длина</th>
+            <th>Ширина</th>
+            <th>Высота</th>
+            <th>Вес</th>
+            <th>Категория</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($results as $result)
+            <tr>
+                <td>
+                    {{ $result->name }}
+                </td>
+
+                <td>
+                    {{ $result->length }}
+                </td>
+
+                <td>
+                    {{ $result->width }}
+                </td>
+
+                <td>
+                    {{ $result->height }}
+                </td>
+
+                <td>
+                    {{ $result->weight }}
+                </td>
+
+                <td>
+                    {{ $result->category?->name }}
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ $results->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 
     <script>
-        $(document).ready(function() {
-            let csrfToken = $('input[name="_token"]').val();
+        const csrfToken = $('input[name="_token"]').val();
 
-            $('.checkmanufacture, .date_contract').click(function() {
-                let manufactureId = "{{$manufacture->id}}";
-                let field = $(this).hasClass('checkmanufacture') ? 'checkmanufacture' : 'date_contract';
-                let newValue = $(this).data('id') === 1 ? 0 : 1;
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
 
-                $.ajax({
-                    url: `/manufacture/boolean/${manufactureId}`,
-                    method: 'PUT',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    data: JSON.stringify({
-                        [field]: newValue,
-                        name: '{{$manufacture->name}}',
-                        web: '{{$manufacture->web}}',
-                    }),
-                    contentType: 'application/json',
-                    success: function(response) {
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        console.error('Ошибка:', xhr);
-                        alert('Ошибка при обновлении данных');
+        const selectedDist = "{{ request('dist') }}";
+        const selectedRegion = "{{ request('region') }}";
+        const selectedCity = "{{ request('city') }}";
+
+        function workWithFederalDist(parent_id, type, selected = null) {
+            let targetSelect;
+
+            if (type === 'createDist') {
+                targetSelect = '#dist';
+            } else if (type === 'dist') {
+                $('#region, #city').empty().append('<option value="">Выберите</option>');
+                targetSelect = '#region';
+            } else if (type === 'region') {
+                $('#city').empty().append('<option value="">Выберите</option>');
+                targetSelect = '#city';
+            }
+
+            $.ajax({
+                url: '/federalDist/' + parent_id,
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                method: 'GET',
+                success: function (response) {
+                    $(targetSelect).empty().append('<option value="">Выберите</option>');
+                    response.federalDist.forEach(item => {
+                        const isSelected = selected && selected == item.id ? 'selected' : '';
+                        $(targetSelect).append(`<option value="${item.id}" ${isSelected}>${item.name}</option>`);
+                    });
+
+                    // Если дальше нужно загружать следующую зависимость
+                    if (type === 'dist' && selectedRegion) {
+                        workWithFederalDist(selected, 'region', selectedCity);
                     }
-                });
-            });
-
-            $('#categories, #products').hide();
-
-            $('.show-categories').click(function () {
-                if ($('#categories').is(':visible')) {
-                    $('#categories').hide();
-                    return
+                },
+                error: function (response) {
+                    console.error('Ошибка загрузки данных:', response);
                 }
-                $('#products').fadeOut(200, function () {
-                    $('#categories').fadeIn(200);
-                });
             });
+        }
 
-            $('.show-products').click(function () {
-                if ($('#products').is(':visible')) {
-                    $('#products').hide();
-                    return
-                } // Если уже открыто, ничего не делать
-                $('#categories').fadeOut(200, function () {
-                    $('#products').fadeIn(200);
-                });
+        $(document).ready(function() {
+            workWithFederalDist(1, 'createDist', selectedDist);
+
+            if (selectedDist) {
+                workWithFederalDist(selectedDist, 'dist', selectedRegion || null);
+            }
+
+            if (selectedRegion && selectedCity) {
+                workWithFederalDist(selectedRegion, 'region', selectedCity);
+            }
+
+            $('#dist').change(function() { workWithFederalDist($(this).val(), 'dist'); });
+            $('#region').change(function() { workWithFederalDist($(this).val(), 'region'); });
+        });
+
+        $(document).ready(function() {
+            $('[data-bs-toggle="tooltip"]').tooltip({
+                trigger: 'manual',
+                placement: 'top'
+            }).on('click', function () {
+                let _this = $(this);
+                if (_this.attr('data-tooltip-shown') === 'true') {
+                    _this.tooltip('hide').attr('data-tooltip-shown', 'false');
+                } else {
+                    _this.tooltip('show').attr('data-tooltip-shown', 'true');
+                    $('.tooltip').on('click', function () {
+                        _this.tooltip('hide').attr('data-tooltip-shown', 'false');
+                    });
+                }
             });
         });
 
+        $(document).ready(function() {
+            var emails = [];
+
+            $(document).on('input', '.email-input', function() {
+                let oldEmail = $(this).attr('data-old-email');
+                let newEmail = $(this).val().trim();
+
+                if (!newEmail || !validateEmail(newEmail)) return;
+
+                let emailIndex = emails.indexOf(oldEmail);
+                if (emailIndex !== -1) {
+                    emails[emailIndex] = newEmail;
+                }
+
+                $(this).attr('data-old-email', newEmail);
+                $("#emails").val(emails.join(","));
+            });
+
+            $(document).on('click', '.delete-email', function() {
+                let emailId = $(this).data('id');
+                if (!confirm("Вы точно хотите удалить почту?")) return;
+
+                let emailIndex = emails.indexOf(emailId);
+                if (emailIndex !== -1) {
+                    emails.splice(emailIndex, 1);
+                }
+
+                $(`button[data-id='${emailId}']`).closest('.email-container').remove();
+
+                $("#emails").val(emails.join(","));
+            });
+
+            $('#add-email').click(function() {
+                let newEmailValue = $('#new-email').val().trim();
+                if (!newEmailValue) {
+                    alert("Поле email не может быть пустым!");
+                    return;
+                }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(newEmailValue)) {
+                    alert("Пожалуйста, введите корректный email!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/email/checked',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        email: newEmailValue,
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        if (response.success) {
+                            if (!emails.includes(newEmailValue)){
+                                emails.push(newEmailValue);
+
+                                $("#emails").val(emails.join(","));
+                                let newEmailHtml = `
+                                <div class="email-container d-flex align-items-center mb-2">
+                                    <input type="email" class="form-control email-input" name="emails[${newEmailValue}]" value="${newEmailValue}" required disabled>
+                                    <button type="button" class="btn btn-danger ms-2 delete-email" data-old-email="${newEmailValue}" data-id="${newEmailValue}">Удалить</button>
+                                </div>`;
+                                $('#email-list').append(newEmailHtml);
+                                $('#new-email').val('');
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                        alert('Ошибка при добавлении почты: ' + xhr.response.message);
+                    }
+                });
+            });
+        });
     </script>
 @endsection

@@ -33,9 +33,9 @@
                             <a class="nav-link" href="/search/category">Поиск по категориям</a>
                         </li>
 
-{{--                        <li class="nav-item">--}}
-{{--                            <a class="nav-link" href="/search/product">Поиск по продукции</a>--}}
-{{--                        </li>--}}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/search/product?pagination=30">Поиск по продукции</a>
+                        </li>
                     @endif
 
 

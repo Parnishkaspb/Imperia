@@ -149,7 +149,7 @@
                         city: $('#city').val(),
                     },
                     success: function(response) {
-                        let table = '<table class="table"> <thead class="table-warning"> ' +
+                        let table = '<table class="table table-hover"> <thead class="table-dark">' +
                             '<tr> <th>Категория</th> <th>Производитель</th> <th>Сайт</th> <th>Почта</th> <th>Город</th> <th>Комментарий</th> </tr> </thead> <tbody>';
 
                         Object.values(response.data).forEach(item => {
@@ -200,7 +200,7 @@
                                 `;
                             }
 
-                            table += `<td> ${item.id_city_manufacture ?? ""}</td>`;
+                            table += `<td>${Object.values(response.dist)[item.id_city_manufacture] ?? ''}</td>`;
 
                             table += `<td> ${item.comment_category ?? ""}</td>`;
 

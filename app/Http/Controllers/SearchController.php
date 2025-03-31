@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\federalDist;
 use App\Models\ManufactureCategory;
+use App\Models\Product;
 use Illuminate\Http\{Request, Response};
 
 class SearchController extends Controller
@@ -87,6 +88,60 @@ class SearchController extends Controller
 
     public function searchProductView(Request $request)
     {
-        return view('search.product');
+        $search = $request->input('search');
+        $searchClean = preg_replace('/[^\p{L}\p{N}]/u', '', ltrim($search));
+        $pagination = $request->input('pagination') ?? 30;
+
+        $query = Product::with('category');
+
+        $filled = $request->input('type') ?? '';
+
+        // Поиск по имени продукта
+        if ($filled === 'product' && $search) {
+            $query->where('nameS', 'like', '%' . $searchClean . '%');
+        }
+
+        // Поиск по имени категории
+        if ($filled === 'category' && $search) {
+            $query->whereHas('category', function ($q) use ($searchClean) {
+                $q->where('namewithout', 'like', '%' . $searchClean . '%');
+            });
+        }
+
+        $results = $query->orderBy('id')->paginate($pagination);
+
+        return view('search.product', compact('results'));
     }
+
+    public function index(Request $request)
+    {
+        $manufactures = Manufacture::with(['fedDistRegion', 'emails']);
+
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $manufactures->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('inn', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('city')) {
+            $manufactures->where('city', $request->input('city'));
+
+        } elseif ($request->filled('region')) {
+            $manufactures->where('region', $request->input('region'));
+
+        } elseif ($request->filled('dist')) {
+            $dist = $request->input('dist');
+            $regionIds = federalDist::where('parentid', $dist)->pluck('id');
+            $manufactures->whereIn('region', $regionIds);
+        }
+
+        $manufactures = $manufactures->orderBy('id', 'DESC')
+            ->paginate(30);
+
+        return view('manufacture.index', compact('manufactures'));
+    }
+
 }
