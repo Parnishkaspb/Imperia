@@ -126,7 +126,7 @@
                 </td>
 
                 <td>
-                    <a href="{{ route('manufacture.show', $manufacture->id) }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('manufacture.show', $manufacture->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                         Редактировать
                     </a>
                     @if(in_array(Auth::user()->role_id, [1, 2, 3]))
