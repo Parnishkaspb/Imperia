@@ -17,6 +17,45 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    <form action="{{ route('manufacture.index') }}" method="GET" class="mb-4">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label for="search" class="form-label">Поиск по имени или ИНН</label>
+                <input type="text" name="search" id="search" class="form-control"
+                       placeholder="Введите имя или ИНН..." value="{{ request('search') }}">
+            </div>
+
+            <div class="col-md-2">
+                <label for="dist" class="form-label">Фед. округ</label>
+                <select class="form-select" id="dist" name="dist">
+                    <option value="">Выберите</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="region" class="form-label">Регион</label>
+                <select class="form-select" id="region" name="region">
+                    <option value="">Выберите</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="city" class="form-label">Город</label>
+                <select class="form-select" id="city" name="city">
+                    <option value="">Выберите</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                <a href="{{ route('manufacture.index') }}" class="btn btn-outline-secondary w-100">Сброс</a>
+            </div>
+
+        </div>
+    </form>
+
     <table class="table table-hover">
         <thead class="table-dark">
         <tr>
@@ -105,7 +144,7 @@
     </table>
 
     <div class="d-flex justify-content-center mt-3">
-        {{ $manufactures->links('pagination::bootstrap-5') }}
+        {{ $manufactures->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 
     <!-- Модальное окно для добавления нового производителя -->
@@ -220,13 +259,25 @@
     <script>
         const csrfToken = $('input[name="_token"]').val();
 
-        function workWithFederalDist(parent_id, type) {
-            let targetSelect = type === 'createDist' ? '#dist' : type === 'dist' ? '#region' : '#city';
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
 
-            if (type === 'dist') {
+        const selectedDist = "{{ request('dist') }}";
+        const selectedRegion = "{{ request('region') }}";
+        const selectedCity = "{{ request('city') }}";
+
+        function workWithFederalDist(parent_id, type, selected = null) {
+            let targetSelect;
+
+            if (type === 'createDist') {
+                targetSelect = '#dist';
+            } else if (type === 'dist') {
                 $('#region, #city').empty().append('<option value="">Выберите</option>');
+                targetSelect = '#region';
             } else if (type === 'region') {
-                $('#city').empty().append('<option value="null">Выберите</option>');
+                $('#city').empty().append('<option value="">Выберите</option>');
+                targetSelect = '#city';
             }
 
             $.ajax({
@@ -236,8 +287,14 @@
                 success: function (response) {
                     $(targetSelect).empty().append('<option value="">Выберите</option>');
                     response.federalDist.forEach(item => {
-                        $(targetSelect).append(`<option value="${item.id}">${item.name}</option>`);
+                        const isSelected = selected && selected == item.id ? 'selected' : '';
+                        $(targetSelect).append(`<option value="${item.id}" ${isSelected}>${item.name}</option>`);
                     });
+
+                    // Если дальше нужно загружать следующую зависимость
+                    if (type === 'dist' && selectedRegion) {
+                        workWithFederalDist(selected, 'region', selectedCity);
+                    }
                 },
                 error: function (response) {
                     console.error('Ошибка загрузки данных:', response);
@@ -245,17 +302,20 @@
             });
         }
 
-        function validateEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
         $(document).ready(function() {
-            workWithFederalDist(1, 'createDist');
+            workWithFederalDist(1, 'createDist', selectedDist);
+
+            if (selectedDist) {
+                workWithFederalDist(selectedDist, 'dist', selectedRegion || null);
+            }
+
+            if (selectedRegion && selectedCity) {
+                workWithFederalDist(selectedRegion, 'region', selectedCity);
+            }
 
             $('#dist').change(function() { workWithFederalDist($(this).val(), 'dist'); });
             $('#region').change(function() { workWithFederalDist($(this).val(), 'region'); });
         });
-
 
         $(document).ready(function() {
             $('[data-bs-toggle="tooltip"]').tooltip({

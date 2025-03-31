@@ -62,22 +62,26 @@ class SearchController extends Controller
         $mc = $mc->map(function ($item) use ($categories) {
             $cat = $categories->where('id', $item->category_id)->first();
             return [
-                'name_category' => $cat ? $cat->name : "",
-                'name_manufacture' => $item->manufacture?->name,
-                'price_manufacture' => $item->manufacture?->price,
-                'website' => $item->manufacture?->web,
-                'emails'  => $item->manufacture?->emails->map(function ($email) {
+                'name_category'       => $cat ? $cat->name : "",
+                'name_manufacture'    => $item->manufacture?->name,
+                'price_manufacture'   => $item->manufacture?->price,
+                'website'             => $item->manufacture?->web,
+                'emails'              => $item->manufacture?->emails->map(function ($email) {
                     return [
-                        'email' => $email->email,
+                        'email'       => $email->email,
                     ];
                 }),
-                'id_manufacture' => $item->manufacture?->id,
-                'comment_category' => $cat? $cat->comment : "",
+                'id_manufacture'      => $item->manufacture?->id,
+                'comment_category'    => $cat? $cat->comment : "",
+                'id_category'         => $item->category_id,
+                'id_city_manufacture' => $item->manufacture?->city,
             ];
         })->toArray();
 
+        $dist = federalDist::pluck('name', 'id')->toArray();
         return response()->json([
-                'data'   => $mc
+                'data'   => $mc,
+                'dist'   => $dist
             ], Response::HTTP_OK);
     }
 

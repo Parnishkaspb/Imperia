@@ -16,7 +16,6 @@
                     <label for="dist">Федеральный округ</label>
                     <select class="form-control" id="dist" name="dist">
                         <option value="">Выберите</option>
-                        <!-- Добавьте варианты -->
                     </select>
                 </div>
 
@@ -24,7 +23,6 @@
                     <label for="region">Регион</label>
                     <select class="form-control" id="region" name="region">
                         <option value="">Выберите</option>
-                        <!-- Добавьте варианты -->
                     </select>
                 </div>
 
@@ -32,7 +30,6 @@
                     <label for="city">Город</label>
                     <select class="form-control" id="city" name="city">
                         <option value="">Выберите</option>
-                        <!-- Добавьте варианты -->
                     </select>
                 </div>
             </div>
@@ -89,6 +86,20 @@
     </style>
     <div id="answer"></div>
 
+    {{--Модальное окно для просмотра продукции, которое производится этим производителем по этой категории--}}
+    <div class="modal fade" id="showProductsByCategoryByManufacture" tabindex="-1" aria-labelledby="showProductsByCategoryByManufactureLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Продукция</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="productsShow"></div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         let csrfToken = $('input[name="_token"]').val();
 
@@ -139,20 +150,23 @@
                     },
                     success: function(response) {
                         let table = '<table class="table"> <thead class="table-warning"> ' +
-                            '<tr> <th>Категория</th> <th>Производитель</th> <th>Сайт</th> <th>Почта</th> <th>Комментарий</th> </tr> </thead> <tbody>';
+                            '<tr> <th>Категория</th> <th>Производитель</th> <th>Сайт</th> <th>Почта</th> <th>Город</th> <th>Комментарий</th> </tr> </thead> <tbody>';
 
                         Object.values(response.data).forEach(item => {
                             table += `<tr>`;
 
                             if (item.price_manufacture === null) {
                                 table += `<td>${item.name_category}</td>`;
-                            } else {
-                                table += `<td><button class="btn btn-outline-danger">${item.name_category}</button></td>`;
+                            } else if (item.price_manufacture) {
+                                table += `
+                                        <td><button class="btn btn-outline-danger mb-3" data-bs-toggle="modal" data-id="${item.id_category}" data-bs-target="#showProductsByCategoryByManufacture">
+                                            ${item.name_category}
+                                        </button></td>`;
                             }
 
                             table += `
                                 <td>${item.name_manufacture}</td>
-                                <td><a href="${item.website}" class="btn btn-info" target="_blank">Ссылка</a></td>
+                                <td><a href="${item.website}" class="btn btn-outline-info" target="_blank">Перейти</a></td>
                             `;
 
                             if (!item.emails || item.emails.length === 0) {
@@ -186,6 +200,8 @@
                                 `;
                             }
 
+                            table += `<td> ${item.id_city_manufacture ?? ""}</td>`;
+
                             table += `<td> ${item.comment_category ?? ""}</td>`;
 
                             table += `</tr>`;
@@ -195,6 +211,8 @@
 
                         $("#answer").html(table);
                         // alert('Here');
+
+                        console.log(response.dist[1])
                     },
                     error: function(xhr) {
                         console.error('Ошибка:', xhr);

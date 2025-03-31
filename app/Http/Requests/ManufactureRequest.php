@@ -26,7 +26,7 @@ class ManufactureRequest extends FormRequest
 
         return [
             'name' => ['required', 'string'],
-            'web' => ['required', 'string',
+            'web' => ['nullable', 'string',
                 Rule::unique('manufactures')->ignore($manufacture ? $manufacture->id : null),
                 ],
             'adress_loading' => ['nullable', 'string'],

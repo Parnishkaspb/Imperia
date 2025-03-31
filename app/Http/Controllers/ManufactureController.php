@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ManufactureRequest;
 use App\Models\Category;
+use App\Models\federalDist;
 use App\Models\Manufacture;
 use App\Models\ManufactureCategory;
 use App\Models\Product;
@@ -17,10 +18,32 @@ use Illuminate\Http\Request;
 
 class ManufactureController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $manufactures = Manufacture::with(['fedDistRegion', 'emails'])
-            ->orderBy('id', 'DESC')
+        $manufactures = Manufacture::with(['fedDistRegion', 'emails']);
+
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $manufactures->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('inn', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('city')) {
+            $manufactures->where('city', $request->input('city'));
+
+        } elseif ($request->filled('region')) {
+            $manufactures->where('region', $request->input('region'));
+
+        } elseif ($request->filled('dist')) {
+            $dist = $request->input('dist');
+            $regionIds = federalDist::where('parentid', $dist)->pluck('id');
+            $manufactures->whereIn('region', $regionIds);
+        }
+
+        $manufactures = $manufactures->orderBy('id', 'DESC')
             ->paginate(30);
 
         return view('manufacture.index', compact('manufactures'));
