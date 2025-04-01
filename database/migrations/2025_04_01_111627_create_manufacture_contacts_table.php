@@ -16,9 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('manufacture_id');
             $table->foreign('manufacture_id')->references('id')->on('manufactures');
             $table->string('name');
-            $table->string('phone');
-            $table->string('position');
-            $table->string('email');
+            $table->string('phone')->nullable();
+            $table->string('position')->nullable();
+            $table->string('email')->nullable();
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
