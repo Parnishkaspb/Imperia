@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Manufacture;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ManufactureRequest;
 use App\Models\Category;
 use App\Models\federalDist;
 use App\Models\Manufacture;
-use App\Models\ManufactureCategory;
 use App\Models\Product;
-use \Illuminate\Http\Response;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Http\Request;
 
 
 class ManufactureController extends Controller
@@ -55,11 +55,17 @@ class ManufactureController extends Controller
         return view('manufacture.show', compact('manufacture'));
     }
 
-    public function fullInformation(Manufacture $manufacture)
+    public function fullInformation(Manufacture $manufacture, Request $request)
     {
-        $manufacture = $manufacture->load(['products.product', 'categories.category']);
+        $manufacture = $manufacture->load(['products.product', 'categories.category', 'contacts']);
 
-        return view('manufacture.full', compact('manufacture'));
+        $editContact = null;
+
+        if ($request->has('editContact')) {
+            $editContact = ManufactureContact::findOrFail($request->editContact);
+        }
+
+        return view('manufacture.full', compact('manufacture', 'editContact'));
     }
 
     public function update(ManufactureRequest $request, Manufacture $manufacture)

@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Search;
 
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Manufacture;
 use App\Models\Category;
 use App\Models\federalDist;
 use App\Models\ManufactureCategory;

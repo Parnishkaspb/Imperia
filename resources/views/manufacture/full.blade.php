@@ -27,10 +27,6 @@
         </div>
     @endif
 
-    <button class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#createNewContactPerson">
-        Новое контактное лицо
-    </button>
-
     <!-- Кнопки для открытия информации в производители -->
     <div class="d-flex justify-content-center align-items-center mb-3">
         <table>
@@ -132,72 +128,118 @@
         </table>
     </div>
 
+    <div>
+        <button class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#createNewContactPerson">
+            Новое контактное лицо
+        </button>
+        <table class="table table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>Кто</th>
+                <th>Должность</th>
+                <th>Телефон</th>
+                <th>Почта</th>
+                <th>Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($manufacture->contacts as $contact)
+                <tr>
+                    <td id="td_name_{{$contact->id}}"> {{ in_array($contact->name, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->name}} </td>
+                    <td id="td_position_{{$contact->id}}">  {{ in_array($contact->position, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->position}} </td>
+                    <td id="td_phone_{{$contact->id}}">  {{ in_array($contact->phone, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->phone}} </td>
+                    <td id="td_email_{{$contact->id}}"> {{ in_array($contact->email, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->email}} </td>
+                    <td>
+                        <a href="{{ route('manufacture.show', ['manufacture' => $manufacture->id, 'editContact' => $contact->id]) }}"
+                           class="btn btn-sm btn-outline-warning">Редактировать</a>
+                        <form method="POST" action="{{ route('manufacture.contact.delete', [$contact->id]) }}" class="d-inline"
+                              onsubmit="return confirm('Вы уверены, что хотите удалить это контактную информацию?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+
+    </div>
+
     <!-- Модальное окно для добавления нового контактного лица -->
-    <div class="modal fade @if ($errors->any()) show d-block @endif" id="createNewContactPerson" tabindex="-1" aria-labelledby="createNewContactPersonLabel" aria-hidden="true">
+    @php $isEdit = isset($editContact); @endphp
+
+    <div class="modal fade @if ($errors->hasBag($isEdit ? 'editContact' : 'createContact')) show d-block @endif"
+         id="{{ $isEdit ? 'editContactModal' : 'createNewContactPerson' }}"
+         tabindex="-1"
+         aria-labelledby="{{ $isEdit ? 'editContactModalLabel' : 'createNewContactPersonLabel' }}"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Добавление нового производителя</h5>
+                    <h5 class="modal-title">
+                        {{ $isEdit ? 'Редактирование контактного лица' : 'Добавление новой контактной информации' }}
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if ($errors->any())
+                    @if ($errors->hasBag($isEdit ? 'editContact' : 'createContact'))
                         <div class="alert alert-danger">
                             <ul>
-                                @foreach ($errors->all() as $error)
+                                @foreach ($errors->getBag($isEdit ? 'editContact' : 'createContact')->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
                         </div>
                     @endif
-                    <form method="POST" action="{{ route('user.store') }}">
+
+                    <form method="POST" action="{{ $isEdit ? route('manufacture.contact.update', $editContact->id) : route('manufacture.contact.store') }}">
                         @csrf
+                        @if ($isEdit)
+                            @method('PUT')
+                        @endif
+
+                        <input type="hidden" name="manufacture_id" value="{{ $manufacture->id }}">
+
                         <div class="mb-3">
-                            <label for="name" class="form-label">Имя</label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name') }}" required>
-                            @error('name')
+                            <label class="form-label">Имя</label>
+                            <input type="text" name="name" class="form-control @error('name', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
+                                   value="{{ old('name', $editContact->name ?? '') }}" required>
+                            @error('name', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="surname" class="form-label">Фамилия</label>
-                            <input type="text" name="surname" class="form-control" value="{{ old('surname') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="patronymic" class="form-label">Отчество</label>
-                            <input type="text" name="patronymic" class="form-control" value="{{ old('patronymic') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="role_id" class="form-label">Роль</label>
-                            <select name="role_id" class="form-select" required>
-                                {{-- Опции ролей будут добавлены здесь --}}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                                   value="{{ old('email') }}" required>
-                            @error('email')
+                            <label class="form-label">Должность</label>
+                            <input type="text" name="position" class="form-control @error('position', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
+                                   value="{{ old('position', $editContact->position ?? '') }}">
+                            @error('position', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
+                            <label class="form-label">Телефон</label>
+                            <input type="text" name="phone" class="form-control @error('phone', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
+                                   value="{{ old('phone', $editContact->phone ?? '') }}">
+                            @error('phone', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Подтвердите пароль</label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
+                            <label class="form-label">Почта</label>
+                            <input type="email" name="email" class="form-control @error('email', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
+                                   value="{{ old('email', $editContact->email ?? '') }}" required>
+                            @error('email', $isEdit ? 'editContact' : 'createContact')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <button type="submit" class="btn btn-outline-primary w-100">Создать</button>
+
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            {{ $isEdit ? 'Сохранить' : 'Создать' }}
+                        </button>
                     </form>
                 </div>
             </div>

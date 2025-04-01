@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Cities;
 
+use App\Http\Controllers\Controller;
 use App\Models\federalDist;
-use Illuminate\Http\Request;
 
 class federalDistController extends Controller
 {

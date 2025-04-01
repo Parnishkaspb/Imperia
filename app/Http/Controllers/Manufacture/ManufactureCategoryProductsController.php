@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Manufacture;
 
-use App\Http\Requests\ManufactureRequest;
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Models\Manufacture;
 use App\Models\ManufactureCategory;
 use App\Models\ManufactureProduct;
 use App\Models\Product;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ManufactureCategoryProductsController extends Controller
 {

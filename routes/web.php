@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\{AdminController,
-    EmailController,
-    federalDistController,
-    LoginController,
-    ManufactureCategoryProductsController,
-    ManufactureController,
-    SearchController,
-    UserController};
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{Cities\federalDistController,
+    Manufacture\ManufactureCategoryProductsController,
+    Manufacture\ManufactureContactController,
+    Manufacture\ManufactureController,
+    Search\SearchController,
+    User\AdminController,
+    User\EmailController,
+    User\LoginController,
+    User\UserController};
 use App\Http\Middleware\CheckRole;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -48,6 +49,15 @@ Route::middleware('auth')->group(function () {
                 Route::post('/show/{manufacture_id}', 'getCache')->name('manufacture.cache.get');
                 Route::delete('/{manufacture_id}', 'deleteCache')->name('manufacture.cache.delete');
             });
+
+
+        });
+
+        Route::controller(ManufactureContactController::class)->group(function () {
+            Route::delete('/contact/{contact}', 'destroy')->name('manufacture.contact.delete');
+
+            Route::post('/contact', 'store')->name('manufacture.contact.store');
+            Route::put('/manufacture/contact/{contact}', 'update')->name('manufacture.contact.update');
         });
 
         Route::controller(ManufactureCategoryProductsController::class)->group(function () {

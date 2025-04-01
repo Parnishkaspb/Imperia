@@ -12,7 +12,8 @@ class ManufactureContact extends Model
         'name',
         'phone',
         'position',
-        'email'
+        'email',
+        'active'
     ];
 
     public function manufacture(): BelongsTo
