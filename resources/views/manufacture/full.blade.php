@@ -150,7 +150,7 @@
                     <td id="td_phone_{{$contact->id}}">  {{ in_array($contact->phone, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->phone}} </td>
                     <td id="td_email_{{$contact->id}}"> {{ in_array($contact->email, ['.', ',', '+', '-', '']) ? "Уточнить" : $contact->email}} </td>
                     <td>
-                        <a href="{{ route('manufacture.show', ['manufacture' => $manufacture->id, 'editContact' => $contact->id]) }}"
+                        <a href="{{ route('manufacture.fullInformation', ['manufacture' => $manufacture->id, 'editContact' => $contact->id]) }}"
                            class="btn btn-sm btn-outline-warning">Редактировать</a>
                         <form method="POST" action="{{ route('manufacture.contact.delete', [$contact->id]) }}" class="d-inline"
                               onsubmit="return confirm('Вы уверены, что хотите удалить это контактную информацию?');">
@@ -166,14 +166,10 @@
 
     </div>
 
-    <!-- Модальное окно для добавления нового контактного лица -->
     @php $isEdit = isset($editContact); @endphp
 
-    <div class="modal fade @if ($errors->hasBag($isEdit ? 'editContact' : 'createContact')) show d-block @endif"
-         id="{{ $isEdit ? 'editContactModal' : 'createNewContactPerson' }}"
-         tabindex="-1"
-         aria-labelledby="{{ $isEdit ? 'editContactModalLabel' : 'createNewContactPersonLabel' }}"
-         aria-hidden="true">
+        <!-- Модалка создания/редактирования контактного лица -->
+    <div class="modal fade" id="{{ $isEdit ? 'editContactModal' : 'createNewContactPerson' }}" tabindex="-1" aria-labelledby="{{ $isEdit ? 'editContactModalLabel' : 'createNewContactPersonLabel' }}" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -203,8 +199,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Имя</label>
-                            <input type="text" name="name" class="form-control @error('name', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
-                                   value="{{ old('name', $editContact->name ?? '') }}" required>
+                            <input type="text" name="name" class="form-control @error('name', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror" value="{{ old('name', $editContact->name ?? '') }}" required>
                             @error('name', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -212,8 +207,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Должность</label>
-                            <input type="text" name="position" class="form-control @error('position', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
-                                   value="{{ old('position', $editContact->position ?? '') }}">
+                            <input type="text" name="position" class="form-control @error('position', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror" value="{{ old('position', $editContact->position ?? '') }}">
                             @error('position', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -221,8 +215,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Телефон</label>
-                            <input type="text" name="phone" class="form-control @error('phone', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
-                                   value="{{ old('phone', $editContact->phone ?? '') }}">
+                            <input type="text" name="phone" class="form-control @error('phone', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror" value="{{ old('phone', $editContact->phone ?? '') }}">
                             @error('phone', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -230,8 +223,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Почта</label>
-                            <input type="email" name="email" class="form-control @error('email', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror"
-                                   value="{{ old('email', $editContact->email ?? '') }}" required>
+                            <input type="email" name="email" class="form-control @error('email', $isEdit ? 'editContact' : 'createContact') is-invalid @enderror" value="{{ old('email', $editContact->email ?? '') }}" required>
                             @error('email', $isEdit ? 'editContact' : 'createContact')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -269,6 +261,25 @@
     </div>
 
     <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            console.log("DOMContentLoaded инициализирован");
+
+            @if ($errors->hasBag('createContact'))
+            console.log("Открытие модалки: createContact");
+            const contactModal = new bootstrap.Modal(document.getElementById('createNewContactPerson'));
+            contactModal.show();
+            @endif
+
+            @if ($errors->has('editContact'))
+            console.log("Открытие модалки: editContact");
+            const editModal = new bootstrap.Modal(document.getElementById('editContactModal'));
+            editModal.show();
+            @endif
+        });
+    </script>
+
+    <script>
+
         $(document).ready(function() {
             let csrfToken = $('input[name="_token"]').val();
 

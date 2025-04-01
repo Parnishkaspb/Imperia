@@ -7,6 +7,7 @@ use App\Http\Requests\ManufactureRequest;
 use App\Models\Category;
 use App\Models\federalDist;
 use App\Models\Manufacture;
+use App\Models\ManufactureContact;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
