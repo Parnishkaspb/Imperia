@@ -37,6 +37,7 @@ yarn-error.log
 /dumps/manufactures.csv
 /dumps/manufactures.sql
 /dumps/migrations.csv
+/dumps/manufacture_contacts.sql
 /my-laravel-container.tar
 /my-mysql.tar
 /my-redis.tar
