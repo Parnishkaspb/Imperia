@@ -49,4 +49,9 @@ class Manufacture extends Model
     {
         return $this->hasMany(ManufactureCategory::class, 'manufacture_id', 'id');
     }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(ManufactureContact::class, 'manufacture_id', 'id');
+    }
 }
