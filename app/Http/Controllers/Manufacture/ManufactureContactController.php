@@ -83,7 +83,7 @@ class ManufactureContactController extends Controller
         }
 
         return redirect()
-            ->route('manufacture.show', $contact->manufacture_id)
+            ->route('manufacture.fullInformation', $contact->manufacture_id)
             ->with('success', 'Контакт успешно обновлён.');
     }
 
@@ -96,9 +96,9 @@ class ManufactureContactController extends Controller
         $string = Auth::user()->name ." удалил контактное лицо у " . $contact->manufacture_id;
         Log::info($string);
 
-        return response()->json([
-            $message = 'Удаление прошло успешно!',
-        ], Response::HTTP_OK);
+        return redirect()
+            ->route('manufacture.fullInformation', $contact->manufacture_id)
+            ->with('success', 'Удаление прошло успешно.');
     }
 
 }

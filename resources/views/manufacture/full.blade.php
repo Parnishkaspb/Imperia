@@ -176,7 +176,8 @@
                     <h5 class="modal-title">
                         {{ $isEdit ? 'Редактирование контактного лица' : 'Добавление новой контактной информации' }}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <a href="{{ route('manufacture.fullInformation', $manufacture->id) }}" class="btn-close" aria-label="Close"> </a>
+{{--                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>--}}
                 </div>
                 <div class="modal-body">
                     @if ($errors->hasBag($isEdit ? 'editContact' : 'createContact'))
@@ -262,16 +263,13 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', function () {
-            console.log("DOMContentLoaded инициализирован");
 
             @if ($errors->hasBag('createContact'))
-            console.log("Открытие модалки: createContact");
             const contactModal = new bootstrap.Modal(document.getElementById('createNewContactPerson'));
             contactModal.show();
             @endif
 
-            @if ($errors->has('editContact'))
-            console.log("Открытие модалки: editContact");
+            @if (request()->has('editContact'))
             const editModal = new bootstrap.Modal(document.getElementById('editContactModal'));
             editModal.show();
             @endif

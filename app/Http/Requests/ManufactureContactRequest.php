@@ -32,6 +32,9 @@ class ManufactureContactRequest extends FormRequest
                 'nullable',
                 'string',
                 Rule::unique('manufacture_contacts')
+                    ->where(function ($query) {
+                        return $query->where('active', 1);
+                    })
                     ->ignore($contact?->id),
             ],
             'email' => [
@@ -39,6 +42,9 @@ class ManufactureContactRequest extends FormRequest
                 'string',
                 'email',
                 Rule::unique('manufacture_contacts')
+                    ->where(function ($query) {
+                        return $query->where('active', 1);
+                    })
                     ->ignore($contact?->id),
             ],
             'position' => ['nullable', 'string'],
