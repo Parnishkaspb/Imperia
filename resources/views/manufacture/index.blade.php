@@ -213,16 +213,16 @@
 
 
                         <div class="mb-3">
-                            <label for="dist" class="form-label">Федеральный округ</label>
-                            <select id="dist" name="dist" class="form-control"></select>
+                            <label for="createDist" class="form-label">Федеральный округ</label>
+                            <select id="createDist" name="dist" class="form-control"></select>
                         </div>
                         <div class="mb-3">
-                            <label for="region" class="form-label">Регион</label>
-                            <select id="region" name="region" class="form-control" required></select>
+                            <label for="createRegion" class="form-label">Регион</label>
+                            <select id="createRegion" name="region" class="form-control" required></select>
                         </div>
                         <div class="mb-3">
-                            <label for="city" class="form-label">Город</label>
-                            <select id="city" name="city" class="form-control"></select>
+                            <label for="createCity" class="form-label">Город</label>
+                            <select id="createCity" name="city" class="form-control"></select>
                         </div>
 
                         <div class="mb-3">
@@ -269,7 +269,6 @@
 
         function workWithFederalDist(parent_id, type, selected = null) {
             let targetSelect;
-
             if (type === 'createDist') {
                 targetSelect = '#dist';
             } else if (type === 'dist') {
@@ -291,7 +290,6 @@
                         $(targetSelect).append(`<option value="${item.id}" ${isSelected}>${item.name}</option>`);
                     });
 
-                    // Если дальше нужно загружать следующую зависимость
                     if (type === 'dist' && selectedRegion) {
                         workWithFederalDist(selected, 'region', selectedCity);
                     }
@@ -302,19 +300,75 @@
             });
         }
 
-        $(document).ready(function() {
+        function initCreateFormLocationSelects() {
+            const createDist = $('#createDist');
+            const createRegion = $('#createRegion');
+            const createCity = $('#createCity');
+
+            createDist.empty().append('<option value="">Выберите</option>');
+            createRegion.empty().append('<option value="">Выберите</option>');
+            createCity.empty().append('<option value="">Выберите</option>');
+
+            $.ajax({
+                url: '/federalDist/1',
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                method: 'GET',
+                success: function (response) {
+                    response.federalDist.forEach(item => {
+                        createDist.append(`<option value="${item.id}">${item.name}</option>`);
+                    });
+                }
+            });
+
+            createDist.change(function () {
+                const distId = $(this).val();
+                createRegion.empty().append('<option value="">Выберите</option>');
+                createCity.empty().append('<option value="">Выберите</option>');
+
+                if (!distId) return;
+
+                $.ajax({
+                    url: '/federalDist/' + distId,
+                    headers: { 'X-CSRF-TOKEN': csrfToken },
+                    method: 'GET',
+                    success: function (response) {
+                        response.federalDist.forEach(item => {
+                            createRegion.append(`<option value="${item.id}">${item.name}</option>`);
+                        });
+                    }
+                });
+            });
+
+            createRegion.change(function () {
+                const regionId = $(this).val();
+                createCity.empty().append('<option value="">Выберите</option>');
+
+                if (!regionId) return;
+
+                $.ajax({
+                    url: '/federalDist/' + regionId,
+                    headers: { 'X-CSRF-TOKEN': csrfToken },
+                    method: 'GET',
+                    success: function (response) {
+                        response.federalDist.forEach(item => {
+                            createCity.append(`<option value="${item.id}">${item.name}</option>`);
+                        });
+                    }
+                });
+            });
+        }
+
+        $(document).ready(function () {
             workWithFederalDist(1, 'createDist', selectedDist);
+            if (selectedDist) workWithFederalDist(selectedDist, 'dist', selectedRegion);
+            if (selectedRegion && selectedCity) workWithFederalDist(selectedRegion, 'region', selectedCity);
 
-            if (selectedDist) {
-                workWithFederalDist(selectedDist, 'dist', selectedRegion || null);
-            }
+            $('#dist').change(function () { workWithFederalDist($(this).val(), 'dist'); });
+            $('#region').change(function () { workWithFederalDist($(this).val(), 'region'); });
 
-            if (selectedRegion && selectedCity) {
-                workWithFederalDist(selectedRegion, 'region', selectedCity);
-            }
-
-            $('#dist').change(function() { workWithFederalDist($(this).val(), 'dist'); });
-            $('#region').change(function() { workWithFederalDist($(this).val(), 'region'); });
+            $('#createNewManufacture').on('shown.bs.modal', function () {
+                initCreateFormLocationSelects();
+            });
         });
 
         $(document).ready(function() {

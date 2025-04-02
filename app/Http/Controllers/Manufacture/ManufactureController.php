@@ -250,7 +250,7 @@ class ManufactureController extends Controller
 
             $emails = explode(" ", $request->emails);
 
-            if (!empty($emails)) {
+            if (!empty($emails) && count($emails) > 0) {
                 $manufacureEmails = [];
                 foreach ($emails as $email) {
                     $manufacureEmails[] = [
