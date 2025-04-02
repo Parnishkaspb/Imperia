@@ -172,7 +172,7 @@
                             if (!item.emails || item.emails.length === 0) {
                                 table += `
                                     <td>
-                                        <a href="/manufacture/${item.id_manufacture}" class="btn btn-sm btn-outline-primary">
+                                        <a href="/manufacture/${item.id_manufacture}" target="_blank" class="btn btn-sm btn-outline-primary">
                                             Добавить
                                         </a>
                                     </td>

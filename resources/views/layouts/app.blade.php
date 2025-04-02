@@ -31,11 +31,11 @@
 
                     @if(in_array(Auth::user()->role_id, [1, 2, 3]))
                         <li class="nav-item">
-                            <a class="nav-link" href="/search/category">Поиск по категориям</a>
+                            <a class="nav-link" href="/search/category">Поиск по производителям</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="/search/product?pagination=30">Поиск по продукции</a>
+                            <a class="nav-link" href="/search/product?pagination=30">Поиск продукции</a>
                         </li>
                     @endif
 
