@@ -10,7 +10,7 @@
         </div>
     @endif
 
-    <a href="/manufacture" class="btn btn-outline-warning w-100"> Назад </a>
+    <a href="{{ url()->previous() }}" class="btn btn-outline-warning w-100"> Назад </a>
 
 
     @if ($errors->any())

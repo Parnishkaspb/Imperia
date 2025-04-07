@@ -248,9 +248,10 @@ class ManufactureController extends Controller
         try {
             $manufacture = Manufacture::create($request->validated());
 
-            $emails = explode(" ", $request->emails);
+            $emails = array_filter(explode(" ", $request->emails));
 
-            if (!empty($emails) && count($emails) > 0) {
+            if (!empty($emails) && is_array($emails) && count($emails) > 0) {
+
                 $manufacureEmails = [];
                 foreach ($emails as $email) {
                     $manufacureEmails[] = [
