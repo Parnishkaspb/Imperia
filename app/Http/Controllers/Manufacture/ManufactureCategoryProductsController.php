@@ -139,16 +139,14 @@ class ManufactureCategoryProductsController extends Controller
                 $logString = Auth::user()->name . " удалил от производителя продукцию";
                 Log::info($logString);
 
-                return redirect()->route('manufacture.fullInformation', $manufacture_id)
-                    ->with('success', "Удаление произошло успешно");
+                return back()->with('success', "Удаление произошло успешно");
 
             } catch (\Exception $e){
                 DB::rollBack();
                 $logString = Auth::user()->name . " пытался удалить от производителя продукцию";
                 Log::info($logString);
 
-                return redirect()->route('manufacture.fullInformation', $manufacture_id)
-                    ->with('error', $e->getMessage());
+                return back()->with('error', $e->getMessage());
             }
         } elseif ($name === 'category'){
             DB::beginTransaction();
@@ -165,15 +163,13 @@ class ManufactureCategoryProductsController extends Controller
                 $logString = Auth::user()->name . " удалил от производителя категорию ";
                 Log::info($logString);
 
-                return redirect()->route('manufacture.fullInformation', $manufacture_id)
-                    ->with('success', "Удаление произошло успешно");
+                return back()->with('success', "Удаление произошло успешно");
             } catch (\Exception $e){
                 DB::rollBack();
                 $logString = Auth::user()->name . " пытался удалить от производителя категорию " . $category_id;
                 Log::info($logString);
 
-                return redirect()->route('manufacture.fullInformation', $manufacture_id)
-                    ->with('error', $e->getMessage());
+                return back()->with('error', $e->getMessage());
             }
         }
 

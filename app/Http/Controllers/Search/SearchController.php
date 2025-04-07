@@ -14,7 +14,64 @@ class SearchController extends Controller
 {
     public function searchCategoryView(Request $request)
     {
-        return view('search.category');
+        $search = $request->input('search');
+        $searchClean = preg_replace('/[^\p{L}\p{N}]/u', '', trim($search));
+        $pagination = $request->input('pagination') ?? 30;
+
+        $dist   = (int) $request->input('dist');
+        $region = (int) $request->input('region');
+        $city   = (int) $request->input('city');
+
+        // Поиск категорий
+        $categories = Category::select('id', 'name')
+            ->when($searchClean !== '', function ($query) use ($searchClean) {
+                $query->where('nameWithOut', 'like', '%' . $searchClean . '%');
+            })
+            ->get();
+
+        $categoryIDs = $categories->pluck('id');
+
+        // Получение ManufactureCategory c отношениями
+        $mcQuery = ManufactureCategory::with(['manufacture.emails'])
+            ->whereIn('category_id', $categoryIDs)
+            ->orderByDesc('likethiscategory');
+
+        // Фильтрация по региону, округу или городу
+        if ($city !== 0) {
+            $mcQuery->whereHas('manufacture', fn($q) => $q->where('city', $city));
+        } elseif ($region !== 0) {
+            $mcQuery->whereHas('manufacture', fn($q) => $q->where('region', $region));
+        } elseif ($dist !== 0) {
+            $regionIds = federalDist::where('parentid', $dist)->pluck('id');
+            $mcQuery->whereHas('manufacture', fn($q) => $q->whereIn('region', $regionIds));
+        }
+
+        // Пагинированный результат
+        $mcPaginated = $mcQuery->paginate($pagination);
+
+        // Преобразуем результат, добавляя данные из categories
+        $mcPaginated->getCollection()->transform(function ($item) use ($categories) {
+            $cat = $categories->firstWhere('id', $item->category_id);
+            return [
+                'name_category'       => $cat->name ?? '',
+                'name_manufacture'    => $item->manufacture->name ?? '',
+                'price_manufacture'   => $item->manufacture->price ?? '',
+                'website'             => $item->manufacture->web ?? '',
+                'emails'              => $item->manufacture->emails->pluck('email'),
+                'id_manufacture'      => $item->manufacture->id ?? null,
+                'comment_category'    => $item->comment ?? '',
+                'id_category'         => $item->category_id,
+                'id_all'              => $item->id,
+                'id_city_manufacture' => $item->manufacture->city ?? null,
+            ];
+        });
+
+        $distList = federalDist::pluck('name', 'id');
+
+        return view('search.category', [
+            'mc'   => $mcPaginated,
+            'dist' => $distList,
+        ]);
     }
 
     public function searchCategoryJson(Request $request)

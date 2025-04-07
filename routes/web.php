@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Product;
 use App\Http\Controllers\{Cities\federalDistController,
+    Edit\CategoryController,
+    Edit\ProductController,
     Manufacture\ManufactureCategoryProductsController,
     Manufacture\ManufactureContactController,
     Manufacture\ManufactureController,
@@ -93,6 +96,18 @@ Route::middleware('auth')->group(function () {
             Route::post('/cfind', 'searchCategoryJson');
 
             Route::get('/product', 'searchProductView')->name('search.product');
+        });
+    });
+
+    Route::prefix('/edit')->group(function () {
+        Route::controller(ProductController::class)->group(function () {
+            Route::get('/product/{product}', 'show')->name('edit.show.product');
+            Route::put('/product/{product}', 'update')->name('edit.update.product');
+        });
+
+        Route::controller(CategoryController::class)->group(function () {
+            Route::get('/category/{category}', 'show')->name('edit.show.category');
+            Route::put('/category/{category}', 'update')->name('edit.update.category');
         });
     });
 });
