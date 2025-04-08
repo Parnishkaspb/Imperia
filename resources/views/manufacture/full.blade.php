@@ -18,6 +18,17 @@
                 data-id="{{ (bool) $manufacture->date_contract }}">
             {{ $manufacture->date_contract ? 'Есть договор' : 'Нет договора' }}
         </button>
+
+        @if($manufacture->price === null || $manufacture->price === '')
+            <a href="{{ route('manufacture.show', $manufacture->id) }}" target="_blank" class="btn btn-outline-danger ms-2">
+                Прайс отсутствует - Добавить
+            </a>
+        @else
+            <a href="{{ $manufacture->price }}" target="_blank" class="btn btn-outline-success ms-2">
+                Прайс
+            </a>
+        @endif
+
     </div>
 
     @if(session('success'))
