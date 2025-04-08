@@ -26,10 +26,17 @@ class ManufactureController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $manufactures->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('inn', 'like', "%{$search}%");
-            });
+
+            if (str_contains($search, '@')) {
+                $manufactures = $manufactures->whereHas('emails', function ($q) use ($search) {
+                    $q->where('email', 'like', '%' . $search . '%');
+                });
+            } else {
+                $manufactures = $manufactures->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('inn', 'like', "%{$search}%");
+                });
+            }
         }
 
         if ($request->filled('city')) {

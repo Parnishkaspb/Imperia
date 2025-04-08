@@ -17,12 +17,6 @@
                 <input type="text" class="form-control" name="search" id="search" placeholder="Введите название категории" value="{{ request('search') }}">
             </div>
 
-{{--            <div class="col-md-4">--}}
-{{--                <label for="search" class="form-label">Введите запрос</label>--}}
-{{--                <input type="text" name="search" id="search" class="form-control"--}}
-{{--                       placeholder="Введите название категории" value="{{ request('search') }}">--}}
-{{--            </div>--}}
-
             <div class="d-flex justify-content-between">
                 <div class="form-group select-container">
                     <label for="dist">Федеральный округ</label>
@@ -127,21 +121,21 @@
         @foreach($mc as $item)
             <tr>
                 <td>
-                    {{ $item['name_category'] }}
+                    @if($item['price_manufacture'] !== '')
+                        <a href="{{ $item['price_manufacture'] }}" class="btn btn-outline-success" target="_blank"> Прайс </a>
+                    @endif
+                    @if($item['count_category'] > 0 )
+                            <button class="btn btn-outline-secondary mb-3 mt-1" id="showAll" data-bs-toggle="modal"
+                                    data-id-category="{{$item['id_category']}}"
+                                    data-id-manufacture="{{$item['id_manufacture']}}"
+                                    data-bs-target="#showAllProductsByThisManufactureAndCategory">
+                                {{ $item['name_category'] }}
+                            </button>
+                    @endif
+                    @if ($item['price_manufacture'] === '' && $item['count_category'] === 0)
+                        {{ $item['name_category'] }}
+                    @endif
                 </td>
-{{--                <td>--}}
-{{--                    @if(is_null($item['price_manufacture']))--}}
-{{--                        {{ $item['name_category'] }}--}}
-{{--                    @elseif($item['price_manufacture'])--}}
-{{--                        <button class="btn btn-outline-danger mb-3"--}}
-{{--                                data-bs-toggle="modal"--}}
-{{--                                data-id="{{ $item['id_category'] }}"--}}
-{{--                                data-bs-target="#showProductsByCategoryByManufacture">--}}
-{{--                            {{ $item['name_category'] }}--}}
-{{--                        </button>--}}
-{{--                    @endif--}}
-{{--                </td>--}}
-
                 <td>{{ $item['name_manufacture'] }}</td>
 
                 <td>

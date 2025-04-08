@@ -22,7 +22,7 @@
         <div class="row g-3 align-items-end">
 
             <div class="col-md-4">
-                <label for="search" class="form-label">Поиск по имени или ИНН</label>
+                <label for="search" class="form-label">Поиск по имени, ИНН или почте</label>
                 <input type="text" name="search" id="search" class="form-control"
                        placeholder="Введите имя или ИНН..." value="{{ request('search') }}">
             </div>

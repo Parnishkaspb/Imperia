@@ -22,7 +22,6 @@ class SearchController extends Controller
         $region = (int) $request->input('region');
         $city   = (int) $request->input('city');
 
-        // Поиск категорий
         $categories = Category::select('id', 'name')
             ->when($searchClean !== '', function ($query) use ($searchClean) {
                 $query->where('nameWithOut', 'like', '%' . $searchClean . '%');
@@ -31,12 +30,20 @@ class SearchController extends Controller
 
         $categoryIDs = $categories->pluck('id');
 
-        // Получение ManufactureCategory c отношениями
-        $mcQuery = ManufactureCategory::with(['manufacture.emails'])
+        $mcQuery = ManufactureCategory::with([
+            'manufacture' => function ($q) use ($categoryIDs) {
+                $q->withCount([
+                    'products as filtered_products_count' => function ($query) use ($categoryIDs) {
+                        $query->whereHas('product', function ($q) use ($categoryIDs) {
+                            $q->whereIn('category_id', $categoryIDs);
+                        });
+                    },
+                ])->with('emails');
+            },
+        ])
             ->whereIn('category_id', $categoryIDs)
             ->orderByDesc('likethiscategory');
 
-        // Фильтрация по региону, округу или городу
         if ($city !== 0) {
             $mcQuery->whereHas('manufacture', fn($q) => $q->where('city', $city));
         } elseif ($region !== 0) {
@@ -46,10 +53,8 @@ class SearchController extends Controller
             $mcQuery->whereHas('manufacture', fn($q) => $q->whereIn('region', $regionIds));
         }
 
-        // Пагинированный результат
         $mcPaginated = $mcQuery->paginate($pagination);
 
-        // Преобразуем результат, добавляя данные из categories
         $mcPaginated->getCollection()->transform(function ($item) use ($categories) {
             $cat = $categories->firstWhere('id', $item->category_id);
             return [
@@ -61,6 +66,7 @@ class SearchController extends Controller
                 'id_manufacture'      => $item->manufacture->id ?? null,
                 'comment_category'    => $item->comment ?? '',
                 'id_category'         => $item->category_id,
+                'count_category'      => $item->manufacture->filtered_products_count,
                 'id_all'              => $item->id,
                 'id_city_manufacture' => $item->manufacture->city ?? null,
             ];
