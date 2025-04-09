@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('manufacture_contacts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('manufacture_id');
-            $table->foreign('manufacture_id')->references('id')->on('manufactures');
+            $table->foreign('manufacture_id')->references('id')->on('manufactures')->onDelete('cascade');
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('position')->nullable();
