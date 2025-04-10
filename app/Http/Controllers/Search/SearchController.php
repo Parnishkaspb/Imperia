@@ -14,13 +14,13 @@ class SearchController extends Controller
 {
     public function searchCategoryView(Request $request)
     {
-        $search = $request->input('search');
-        $searchClean = preg_replace('/[^\p{L}\p{N}]/u', '', trim($search));
-        $pagination = $request->input('pagination') ?? 30;
+        $search     = $request->input('search');
+        $pagination = (int) ($request->input('pagination') ?? 30);
+        $dist       = (int) $request->input('dist');
+        $region     = (int) $request->input('region');
+        $city       = (int) $request->input('city');
 
-        $dist   = (int) $request->input('dist');
-        $region = (int) $request->input('region');
-        $city   = (int) $request->input('city');
+        $searchClean = preg_replace('/[^\p{L}\p{N}]/u', '', trim($search));
 
         $categories = Category::select('id', 'name')
             ->when($searchClean !== '', function ($query) use ($searchClean) {
@@ -31,18 +31,9 @@ class SearchController extends Controller
         $categoryIDs = $categories->pluck('id');
 
         $mcQuery = ManufactureCategory::with([
-            'manufacture' => function ($q) use ($categoryIDs) {
-                $q->withCount([
-                    'products as filtered_products_count' => function ($query) use ($categoryIDs) {
-                        $query->whereHas('product', function ($q) use ($categoryIDs) {
-                            $q->whereIn('category_id', $categoryIDs);
-                        });
-                    },
-                ])->with('emails');
-            },
-        ])
-            ->whereIn('category_id', $categoryIDs)
-            ->orderByDesc('likethiscategory');
+            'manufacture.products.product',
+            'manufacture.emails',
+        ])->whereIn('category_id', $categoryIDs);
 
         if ($city !== 0) {
             $mcQuery->whereHas('manufacture', fn($q) => $q->where('city', $city));
@@ -55,20 +46,28 @@ class SearchController extends Controller
 
         $mcPaginated = $mcQuery->paginate($pagination);
 
-        $mcPaginated->getCollection()->transform(function ($item) use ($categories) {
-            $cat = $categories->firstWhere('id', $item->category_id);
+        $mcPaginated->getCollection()->transform(function ($mc) use ($categoryIDs, $categories) {
+            $filtered = $mc->manufacture->products
+                ->filter(function ($p) use ($mc) {
+                    return $p->product && $p->product->category_id === $mc->category_id;
+                })
+                ->unique(fn($p) => $p->product->id);
+            $mc->manufacture->filtered_products_count = $filtered->count();
+
+            $cat = $categories->firstWhere('id', $mc->category_id);
+
             return [
                 'name_category'       => $cat->name ?? '',
-                'name_manufacture'    => $item->manufacture->name ?? '',
-                'price_manufacture'   => $item->manufacture->price ?? '',
-                'website'             => $item->manufacture->web ?? '',
-                'emails'              => $item->manufacture->emails->pluck('email'),
-                'id_manufacture'      => $item->manufacture->id ?? null,
-                'comment_category'    => $item->comment ?? '',
-                'id_category'         => $item->category_id,
-                'count_category'      => $item->manufacture->filtered_products_count,
-                'id_all'              => $item->id,
-                'id_city_manufacture' => $item->manufacture->city ?? null,
+                'name_manufacture'    => $mc->manufacture->name ?? '',
+                'price_manufacture'   => $mc->manufacture->price ?? '',
+                'website'             => $mc->manufacture->web ?? '',
+                'emails'              => $mc->manufacture->emails->pluck('email'),
+                'id_manufacture'      => $mc->manufacture->id ?? null,
+                'comment_category'    => $mc->comment ?? '',
+                'id_category'         => $mc->category_id,
+                'count_category'      => $mc->manufacture->filtered_products_count,
+                'id_all'              => $mc->id,
+                'id_city_manufacture' => $mc->manufacture->city ?? null,
             ];
         });
 

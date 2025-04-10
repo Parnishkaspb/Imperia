@@ -52,8 +52,6 @@ Route::middleware('auth')->group(function () {
                 Route::post('/show/{manufacture_id}', 'getCache')->name('manufacture.cache.get');
                 Route::delete('/{manufacture_id}', 'deleteCache')->name('manufacture.cache.delete');
             });
-
-
         });
 
         Route::controller(ManufactureContactController::class)->group(function () {
@@ -72,6 +70,10 @@ Route::middleware('auth')->group(function () {
 
 
             Route::delete('/delete/{delete_id}/{name}', 'manufacturePCDelete')->name('manufacture.pc.delete');
+        });
+
+        Route::controller(ProductController::class)->group(function () {
+            Route::get('/product/{manufacture}/{category}', 'showProductsByManufacture')->name('product.index');
         });
     });
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Edit;
 
+use App\Models\Manufacture;
 use Illuminate\Support\Facades\{Auth, Log};
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,5 +35,22 @@ class ProductController extends Controller
         Log::info($string);
 
         return redirect()->route('edit.show.product', ['product' => $product->id])->with('success', 'Обновление произошло успешно');
+    }
+
+    public function showProductsByManufacture(Manufacture $manufacture, $category)
+    {
+        $manufacture->load('products.product');
+
+        $filteredProducts = $manufacture->products->filter(function ($mp) use ($category) {
+            return $mp->product && $mp->product->category_id == $category;
+        })->map(function ($mp) {
+            return [
+                'id' => $mp->id,
+                'name' => $mp->product->name,
+                'doit' => $mp->doit,
+            ];
+        });
+
+        return response()->json(['products' => $filteredProducts->values()], 200);
     }
 }

@@ -47,7 +47,6 @@
             </div>
 
             <div class="form-group mt-4">
-{{--                <label for="pagination" class="form-label"></label>--}}
                 <select class="form-select" id="pagination" name="pagination">
                     <option value="10" {{ request()->get('pagination') == '10' ? 'selected' : '' }}>Количество элементов на странице: 10</option>
                     <option value="30" {{ request()->get('pagination') == '30' ? 'selected' : '' }}>Количество элементов на странице: 30</option>
@@ -175,9 +174,12 @@
                         <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
                     </form>
 
-                    <button class="btn btn-sm btn-outline-primary mb-3 mt-1" id="addComment" data-bs-toggle="modal" data-id="{{$item['id_all']}}" data-bs-target="#createNewComment">
+                    <button class="btn btn-sm btn-outline-primary mb-1 mt-1" id="addComment" data-bs-toggle="modal" data-id="{{$item['id_all']}}" data-bs-target="#createNewComment">
                         Комментарий
                     </button>
+
+                    <a href="{{ route('manufacture.fullInformation', $item['id_manufacture']) }}" target="_blank" class="btn btn-sm btn-outline-secondary"> К производителю </a>
+
                 </td>
 
             </tr>
@@ -308,6 +310,79 @@
                     }
                 });
             });
+
+
+            $(document).on('click', '#showAll', function() {
+                const id_manufacture = $(this).data('id-manufacture');
+                const id_category = $(this).data('id-category');
+
+                $.get({
+                    url: '/manufacture/product/' + id_manufacture + '/' + id_category,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function (response) {
+                        let table = '<table class="table table-bordered"><thead><tr>' +
+                            '<th>Название</th>' +
+                            '<th>Делает</th>' +
+                            '<th>Действие</th>' +
+                            '</tr></thead><tbody>';
+
+                        response.products.forEach(product => {
+                            table += `<tr>
+                                <td>${product.name}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-${product.doit ? 'warning' : 'danger'}"
+                                            id="yesno"
+                                            data-name="product"
+                                            data-id="${product.id}">
+                                        ${product.doit ? 'Да' : 'Нет'}
+                                    </button>
+                                </td>
+                                <td>
+                                    <form method="POST"
+                                          action="/manufacture/delete/${product.id}/product"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Вы уверены, что хотите удалить эту связку?');">
+                                        <input type="hidden" name="_token" value="${csrfToken}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>`;
+                        });
+
+                        table += '</tbody></table>';
+
+                        $('#productsShow').html(table);
+                        $('#showProductsByCategoryByManufacture').modal('show');
+                    }
+                });
+
+            });
+
+
+            $(document).on('click', '#yesno', function() {
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+                let element = $(this);
+
+                $.ajax({
+                    url: '/manufacture/updatePC/'+ id +'/' + name,
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        element.text(response.name);
+                        element.attr('class', response.class);
+                    },
+                    error: function(xhr) {
+                        alert('Ошибка: ' + xhr.response.message);
+                    }
+                });
+            });
+
         });
 
     </script>
