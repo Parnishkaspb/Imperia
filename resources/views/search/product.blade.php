@@ -90,12 +90,8 @@
 
                 <td>
                     <a href="{{ route('edit.show.category', ['category' => $result->category?->id]) }}" target="_blank" class="btn btn-outline-danger mt-2"> Изменить категорию </a>
+                    <a href="{{ route('edit.show.product', ['product' => $result->id]) }}" target="_blank" class="btn btn-outline-danger"> Изменить продукцию </a>
                 </td>
-                @if (Auth::user()->role_id === 1)
-                    <td>
-                        <a href="{{ route('edit.show.product', ['product' => $result->id]) }}" target="_blank" class="btn btn-outline-danger"> Изменить продукцию </a>
-                    </td>
-                @endif
             </tr>
         @endforeach
         </tbody>
