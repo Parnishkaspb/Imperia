@@ -96,7 +96,16 @@
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="emailDropdown{{ $manufacture->id }}">
                                 @foreach($manufacture->emails as $email)
-                                    <li><a class="dropdown-item" href="mailto:{{ $email->email }}">{{ $email->email }}</a></li>
+                                    <li>
+                                        <button type="button"
+                                                class="dropdown-item copy-email-btn"
+                                                data-email="{{ $email->email }}"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="right"
+                                                title="Скопировано!">
+                                            {{ $email->email }}
+                                        </button>
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>
@@ -463,6 +472,31 @@
                         console.log(xhr);
                         alert('Ошибка при добавлении почты: ' + xhr.response.message);
                     }
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $('.copy-email-btn').each(function () {
+                new bootstrap.Tooltip(this, {
+                    trigger: 'manual' // отключаем hover/focus
+                });
+            });
+
+            $('.copy-email-btn').on('click', function () {
+                const btn = this;
+                const email = $(btn).data('email');
+
+                navigator.clipboard.writeText(email).then(function () {
+                    const tooltip = bootstrap.Tooltip.getInstance(btn);
+                    tooltip.setContent({ '.tooltip-inner': 'Скопировано!' });
+                    tooltip.show();
+
+                    setTimeout(function () {
+                        tooltip.hide();
+                    }, 3000);
+                }).catch(function (err) {
+                    console.error('Ошибка копирования: ', err);
                 });
             });
         });
