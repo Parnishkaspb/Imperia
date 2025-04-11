@@ -489,7 +489,7 @@
         $(document).ready(function () {
             $('.copy-email-btn').each(function () {
                 new bootstrap.Tooltip(this, {
-                    trigger: 'manual' // отключаем hover/focus
+                    trigger: 'manual'
                 });
             });
 
@@ -497,17 +497,25 @@
                 const btn = this;
                 const email = $(btn).data('email');
 
-                navigator.clipboard.writeText(email).then(function () {
-                    const tooltip = bootstrap.Tooltip.getInstance(btn);
-                    tooltip.setContent({ '.tooltip-inner': 'Скопировано!' });
-                    tooltip.show();
+                const tempInput = $('<input>');
+                $('body').append(tempInput);
+                tempInput.val(email).select();
 
-                    setTimeout(function () {
-                        tooltip.hide();
-                    }, 3000);
-                }).catch(function (err) {
-                    console.error('Ошибка копирования: ', err);
-                });
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        const tooltip = bootstrap.Tooltip.getInstance(btn);
+                        tooltip.setContent({ '.tooltip-inner': 'Скопировано!' });
+                        tooltip.show();
+                        setTimeout(() => tooltip.hide(), 3000);
+                    } else {
+                        console.error('Копирование не удалось');
+                    }
+                } catch (err) {
+                    console.error('Ошибка копирования:', err);
+                }
+
+                tempInput.remove();
             });
         });
     </script>
