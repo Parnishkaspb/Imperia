@@ -90,25 +90,35 @@
                             Добавить
                         </a>
                     @elseif($manufacture->emails->count() >= 1)
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="emailDropdown{{ $manufacture->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                Почта
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="emailDropdown{{ $manufacture->id }}">
-                                @foreach($manufacture->emails as $email)
-                                    <li>
-                                        <button type="button"
-                                                class="dropdown-item copy-email-btn"
-                                                data-email="{{ $email->email }}"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="right"
-                                                title="Скопировано!">
-                                            {{ $email->email }}
-                                        </button>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        @foreach($manufacture->emails as $email)
+                                <button type="button"
+                                        class="btn btn-sm mt-1 btn-outline-success copy-email-btn"
+                                        data-email="{{ $email->email }}"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="right"
+                                        title="Скопировано!">
+                                    {{ $email->email }}
+                                </button>
+                        @endforeach
+{{--                        <div class="dropdown">--}}
+{{--                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="emailDropdown{{ $manufacture->id }}" data-bs-toggle="dropdown" aria-expanded="false">--}}
+{{--                                Почта--}}
+{{--                            </button>--}}
+{{--                            <ul class="dropdown-menu" aria-labelledby="emailDropdown{{ $manufacture->id }}">--}}
+{{--                                @foreach($manufacture->emails as $email)--}}
+{{--                                    <li>--}}
+{{--                                        <button type="button"--}}
+{{--                                                class="dropdown-item copy-email-btn"--}}
+{{--                                                data-email="{{ $email->email }}"--}}
+{{--                                                data-bs-toggle="tooltip"--}}
+{{--                                                data-bs-placement="right"--}}
+{{--                                                title="Скопировано!">--}}
+{{--                                            {{ $email->email }}--}}
+{{--                                        </button>--}}
+{{--                                    </li>--}}
+{{--                                @endforeach--}}
+{{--                            </ul>--}}
+{{--                        </div>--}}
                     @endif
                 </td>
 
