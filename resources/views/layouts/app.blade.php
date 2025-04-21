@@ -39,6 +39,12 @@
                         </li>
                     @endif
 
+                    @if(in_array(Auth::user()->role_id, [1, 5]))
+                        <li class="nav-item">
+                            <a class="nav-link" href="/carriers">Выбор перевозчиков</a>
+                        </li>
+                    @endif
+
 
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST">
