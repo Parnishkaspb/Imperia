@@ -12,7 +12,7 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, $role)
     {
-        if (!auth()->check() || auth()->user()->role_id != (int) $role) {
+        if (!auth()->check() && (auth()->user()->role_id != (int) $role || auth()->user()->role_id !== 1)) {
             abort(403, 'Доступ запрещен!');
         }
 

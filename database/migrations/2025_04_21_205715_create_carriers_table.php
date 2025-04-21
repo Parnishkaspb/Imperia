@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('who')->comment("Кто занимается перевозкой");
             $table->unsignedBigInteger('type_car_id');
-            $table->foreign('type_car_id')->references('id')->on('car_types')->onDelete('cascade');
+            $table->foreign('type_car_id')->references('id')->on('type_cars')->onDelete('cascade');
             $table->string('telephone');
             $table->string('email');
             $table->text('note');

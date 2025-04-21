@@ -1,7 +1,8 @@
 <?php
 
 use App\Models\Product;
-use App\Http\Controllers\{Cities\federalDistController,
+use App\Http\Controllers\{Carrier\CarrierController,
+    Cities\federalDistController,
     Edit\CategoryController,
     Edit\ProductController,
     Manufacture\ManufactureCategoryProductsController,
@@ -132,6 +133,21 @@ Route::middleware(['auth', CheckRole::class . ':1'])->group(function () {
     });
 });
 
+
+Route::middleware(['auth', CheckRole::class . ':5'])->group(function () {
+    Route::prefix('carrier')->group(function () {
+        Route::controller(CarrierController::class)->group(function () {
+            Route::get('/', 'index')->name('carrier.index');
+            Route::post('/', 'store')->name('carrier.store');
+            Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
+            Route::get('/{carrier}', 'show')->name('carrier.show');
+
+            Route::put('/{carrier}/{type}', 'change')->name('carrier.change');
+
+
+        });
+    });
+});
 
 //Route::middleware(['auth', 'role:2'])->group(function () {
 //    Route::get('/user/dashboard', function () {
