@@ -24,7 +24,7 @@
             <div class="col-md-4">
                 <label for="search" class="form-label">Поиск по имени, телефону или почте</label>
                 <input type="text" name="search" id="search" class="form-control"
-                       placeholder="Введите имя или ИНН..." value="{{ request('search') }}">
+                       placeholder="Введите имя, телефон или почту..." value="{{ request('search') }}">
             </div>
 
             <div class="col-md-2">
@@ -174,6 +174,22 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="telephone" class="form-label">Телефон</label>
+                            <input type="text" name="telephone" class="form-control @error('telephone') is-invalid @enderror" value="{{ old('telephone')}}">
+                            @error('telephone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Почта</label>
+                            <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email')}}">
+                            @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label for="note" class="form-label">Заметки</label>
                             <textarea type="text" name="note" class="form-control @error('note') is-invalid @enderror">{{ old('note')}}</textarea>
                                 @error('note')
@@ -181,8 +197,24 @@
                             @enderror
                         </div>
 
+                        <div class="md-3">
+                            @foreach($types as $type)
+                                <input
+                                    type="checkbox"
+                                    class="btn-check"
+                                    name="type_cars[]"
+                                    id="{{ $type->id }}"
+                                    value="{{ $type->id }}"
+                                    autocomplete="off"
+                                >
+                                <label class="btn mt-1 btn-outline-primary" for="{{ $type->id }}">
+                                    {{ $type->type }}
+                                </label>
+                            @endforeach
+                        </div>
 
-                        <button type="submit" class="btn btn-outline-primary w-100">Создать</button>
+
+                        <button type="submit" class="btn mt-1 btn-outline-primary w-100">Создать</button>
                     </form>
                 </div>
             </div>
