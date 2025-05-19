@@ -9,6 +9,7 @@ use App\Http\Controllers\{Carrier\CarrierController,
     Manufacture\ManufactureCategoryProductsController,
     Manufacture\ManufactureContactController,
     Manufacture\ManufactureController,
+    OrderController,
     OrderDetailController,
     Search\SearchController,
     User\AdminController,
@@ -155,7 +156,7 @@ Route::middleware(CheckIp::class)->group(function () {
 
     Route::middleware(['auth', CheckRole::class . ':4'])->group(function () {
         Route::prefix('carrier')->group(function () {
-            Route::controller(OrderDetailController::class)->group(function () {
+            Route::controller(OrderController::class)->group(function () {
                 Route::get('/', 'index')->name('carrier.index');
                 Route::post('/', 'store')->name('carrier.store');
                 Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
