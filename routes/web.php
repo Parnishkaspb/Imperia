@@ -9,6 +9,7 @@ use App\Http\Controllers\{Carrier\CarrierController,
     Manufacture\ManufactureCategoryProductsController,
     Manufacture\ManufactureContactController,
     Manufacture\ManufactureController,
+    OrderDetailController,
     Search\SearchController,
     User\AdminController,
     User\EmailController,
@@ -136,10 +137,25 @@ Route::middleware(CheckIp::class)->group(function () {
         });
     });
 
-
     Route::middleware(['auth', CheckRole::class . ':5'])->group(function () {
         Route::prefix('carrier')->group(function () {
             Route::controller(CarrierController::class)->group(function () {
+                Route::get('/', 'index')->name('carrier.index');
+                Route::post('/', 'store')->name('carrier.store');
+                Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
+                Route::get('/{carrier}', 'show')->name('carrier.show');
+                Route::put('/{carrier}', 'update')->name('carrier.update');
+
+                Route::put('/{carrier}/{type}', 'change')->name('carrier.change');
+
+
+            });
+        });
+    });
+
+    Route::middleware(['auth', CheckRole::class . ':4'])->group(function () {
+        Route::prefix('carrier')->group(function () {
+            Route::controller(OrderDetailController::class)->group(function () {
                 Route::get('/', 'index')->name('carrier.index');
                 Route::post('/', 'store')->name('carrier.store');
                 Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
