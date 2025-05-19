@@ -17,16 +17,16 @@ return new class extends Migration
         });
 
         $Order_Statuses = array(
-            array('id_status' => '0','name' => 'Заявка принята'),
-            array('id_status' => '1','name' => 'Передана снабжению'),
-            array('id_status' => '2','name' => 'Предварительное КП'),
-            array('id_status' => '3','name' => 'Анализ рынка ЗАКОНЧЕН'),
-            array('id_status' => '4','name' => 'Предложение отправлено'),
-            array('id_status' => '5','name' => 'Счет отправлен'),
-            array('id_status' => '6','name' => 'Исполнение заказа'),
-            array('id_status' => '7','name' => 'УПД не подписаны'),
-            array('id_status' => '8','name' => 'Успешно реализован'),
-            array('id_status' => '9','name' => 'Закрыто и не реализовано')
+            array('id' => '0','name' => 'Заявка принята'),
+            array('id' => '1','name' => 'Передана снабжению'),
+            array('id' => '2','name' => 'Предварительное КП'),
+            array('id' => '3','name' => 'Анализ рынка ЗАКОНЧЕН'),
+            array('id' => '4','name' => 'Предложение отправлено'),
+            array('id' => '5','name' => 'Счет отправлен'),
+            array('id' => '6','name' => 'Исполнение заказа'),
+            array('id' => '7','name' => 'УПД не подписаны'),
+            array('id' => '8','name' => 'Успешно реализован'),
+            array('id' => '9','name' => 'Закрыто и не реализовано')
         );
 
         DB::table('order_statuses')->insert($Order_Statuses);
