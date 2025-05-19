@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_statuses', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             $table->string('name');
         });
+
+        DB::table('order_statuses')->truncate();
 
         $Order_Statuses = array(
             array('id' => '0','name' => 'Заявка принята'),
