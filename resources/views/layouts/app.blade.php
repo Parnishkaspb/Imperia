@@ -45,9 +45,9 @@
                         </li>
                     @endif
 
-                    @if(in_array(Auth::user()->role_id, [1, 4]))
+                    @if(Auth::user()->role_id !== 6)
                         <li class="nav-item">
-                            <a class="nav-link" href="/carrier">Выбор перевозчиков</a>
+                            <a class="nav-link" href="/order">Заказы</a>
                         </li>
                     @endif
 

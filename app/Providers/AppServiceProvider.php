@@ -21,4 +21,9 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
+
+    protected $policies = [
+        \App\Models\Order::class => \App\Policies\OrderPolicy::class,
+        \App\Models\OrderProduct::class => \App\Policies\OrderProductPolicy::class,
+    ];
 }

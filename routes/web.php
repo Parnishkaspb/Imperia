@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Middleware\CheckIp;
-use App\Models\Product;
 use App\Http\Controllers\{Carrier\CarrierController,
     Cities\federalDistController,
     Edit\CategoryController,
@@ -9,13 +7,13 @@ use App\Http\Controllers\{Carrier\CarrierController,
     Manufacture\ManufactureCategoryProductsController,
     Manufacture\ManufactureContactController,
     Manufacture\ManufactureController,
-    OrderController,
-    OrderDetailController,
+    Order\OrderController,
     Search\SearchController,
     User\AdminController,
     User\EmailController,
     User\LoginController,
     User\UserController};
+use App\Http\Middleware\CheckIp;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 
@@ -155,15 +153,23 @@ Route::middleware(CheckIp::class)->group(function () {
     });
 
     Route::middleware(['auth', CheckRole::class . ':4'])->group(function () {
-        Route::prefix('carrier')->group(function () {
+        Route::prefix('order')->group(function () {
             Route::controller(OrderController::class)->group(function () {
-                Route::get('/', 'index')->name('carrier.index');
+                Route::get('/', 'index')->name('order.index');
                 Route::post('/', 'store')->name('carrier.store');
-                Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
-                Route::get('/{carrier}', 'show')->name('carrier.show');
-                Route::put('/{carrier}', 'update')->name('carrier.update');
+//                Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
+                Route::get('/{order}', 'show')->name('order.show');
 
-                Route::put('/{carrier}/{type}', 'change')->name('carrier.change');
+                Route::delete('/{order}/{what}/{value}', 'deleteSm')->name('order.delete.sm');
+                Route::put('/{order}', 'update')->name('order.update.sm');
+
+
+                Route::post('/product', 'workWithProductToRedis')->name('order.product.redis');
+                Route::post('/productC', 'workWithProductToRedisGet')->name('order.product.redis.get');
+
+//                Route::put('/{carrier}', 'update')->name('carrier.update');
+//
+//                Route::put('/{carrier}/{type}', 'change')->name('carrier.change');
 
 
             });

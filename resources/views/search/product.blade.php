@@ -44,14 +44,43 @@
             {{-- Кнопки действий --}}
             <div class="col-md-3 d-flex gap-2">
                 <button type="submit" class="btn btn-primary w-50">Поиск</button>
-                <a href="{{ route('search.product', ['pagination' => 30]) }}" class="btn btn-outline-secondary w-50">Сброс</a>
+                <a href="{{ route('search.product', ['pagination' => 30, 'order_id' => request()->get('order_id')]) }}" class="btn btn-outline-secondary w-50">Сброс</a>
             </div>
+
+
+            {{-- Кнопки действий для добавления к заказу --}}
+            <div class="col-md-12 d-flex gap-2">
+                <button type="button" onclick="addToOrder({{request()->get('order_id') ?? null}})" class="btn btn-outline-warning {{request()->get('order_id') ? "w-50" : "w-100"}}"> {{request()->get('order_id') ? "Добавить к заказу: " . request()->get('order_id')  : "Создать новый"}} </button>
+                @if(request()->get('order_id'))
+                <a href="{{ route('order.show', request()->get('order_id')) }}" class="btn btn-outline-secondary w-50"> Вернуться к заказу </a>
+                @endif
+
+                <input type="hidden" name="order_id" value="{{request()->get('order_id')}}">
+            </div>
+
+            <div class="col-md-12 d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary w-100" id="watchCount" onclick="countRedis({{request()->get('order_id') ?? null}})"> Посмотреть </button>
+            </div>
+
         </div>
     </form>
+
+    <table class="table table-hover" style="display: none" id="tableCount">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody id="tbodyTable"></tbody>
+    </table>
+
 
     <table class="table table-hover">
         <thead class="table-dark">
         <tr>
+            <th>Выбор</th>
             <th>Название</th>
             <th>Длина</th>
             <th>Ширина</th>
@@ -62,8 +91,14 @@
         </tr>
         </thead>
         <tbody>
+
         @foreach($results as $result)
             <tr>
+                <td>
+                    <input type="checkbox" name="scales" class="orderRedis" onclick="getSelectedCheckboxArray(this, {{$result->id}}, '{{$result->name}}', {{$result->category?->id}}, {{request()->get('order_id') ?? null}})"
+                        {{ in_array($result->id, $items) ? 'checked' : '' }}
+                    >
+                </td>
                 <td>
                     {{ $result->name }}
                 </td>
@@ -257,5 +292,56 @@
                 });
             });
         });
+
+        function getSelectedCheckboxArray(checkbox, product_id, product_name, product_category, order = null){
+            let isChecked = $(checkbox).is(':checked');
+            $.post({
+                url: "/order/product",
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: {
+                    product_id, product_name, order, isChecked, product_category
+                },
+                success: function (response){
+                    // console.log(response);
+                },
+                error: function (){
+
+                }
+            });
+        }
+
+        function countRedis(order_id){
+            $('#tableCount').toggle();
+
+            $.post({
+                url: "/order/productC",
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: {
+                    order: order_id
+                },
+                success: function (response){
+                    $("#tbodyTable").html(response);
+                },
+                error: function (){
+
+                }
+            });
+        }
+
+
+        function addToOrder(order = null){
+            $.post({
+                url: '/order',
+                data: {order},
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                success: function (response){
+                    alert(response.message);
+                    if (response.order_id >= 1){
+                        location.href = "/order/" + response.order_id;
+                    }
+                },
+                error: function (){}
+            });
+        }
     </script>
 @endsection

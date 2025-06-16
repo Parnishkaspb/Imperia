@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\federalDist;
 use App\Models\ManufactureCategory;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\{Request, Response};
 
 class SearchController extends Controller
@@ -174,7 +176,12 @@ class SearchController extends Controller
 
         $results = $query->orderBy('id')->paginate($pagination);
 
-        return view('search.product', compact('results'));
+        $userId = Auth::user()->id;
+        $order = $request->order_id ?? "newOrder";
+        $cachedData = Cache::get("{$userId}_order_{$order}", '[]');
+        $items = json_decode($cachedData, true) ?? [];
+        $items = array_column($items, 'product_id') ?? [];
+        return view('search.product', compact('results', 'items'));
     }
 
     public function index(Request $request)
