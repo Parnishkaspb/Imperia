@@ -71,14 +71,31 @@ class OrderController extends Controller
 
         $manufactures = array_unique(array_column($orderManufacture->toArray(), 'manufacture_id'));
         $manufactures = Manufacture::with(['emails'])->whereIn('id', $manufactures)->get();
-        $manufactures = $manufactures->map(function ($manufacture) {
+        $manufactures = $manufactures->keyBy('id')->map(function ($manufacture) {
             return [
-                $manufacture->id => [
-                    'name' => $manufacture->name,
-                    'emails' => $manufacture?->emails->pluck('email')->toArray() ?? [],
-                ]
+                'name' => $manufacture->name,
+                'emails' => $manufacture->emails->pluck('email')->toArray(),
             ];
         })->toArray();
+
+        $tmp = [
+            "th" => [],
+            "body" => []
+        ];
+
+        foreach ($orderManufacture as $manufacture) {
+            if (!isset($tmp["th"][$manufacture->manufacture_id])) {
+                $tmp["th"][$manufacture->category_id][$manufacture->manufacture_id] = $manufactures[$manufacture->manufacture_id];
+            }
+
+            $tmp["body"][$manufacture->category_id][$manufacture->product_id][$manufacture->manufacture_id] = [
+                "comment" => $manufacture->comment,
+                "price" => $manufacture->price,
+            ];
+        }
+
+        $manufactures = $tmp;
+        unset($tmp);
 
 
         return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures'));
@@ -136,7 +153,19 @@ class OrderController extends Controller
                 $order->save();
                 break;
 
+            case 19:
+                OrderManufacture::where('order_id', (int) $order->id)->where('product_id', (int) $request->product_id)->where('manufacture_id', (int) $request->update_id)->update([
+                   "price" => (int) $request->value,
+                ]);
+                $order->touch();
+                break;
 
+            case 20:
+                OrderManufacture::where('order_id', (int) $order->id)->where('product_id', (int) $request->product_id)->where('manufacture_id', (int) $request->update_id)->update([
+                    "comment" => (string) $request->value,
+                ]);
+                $order->touch();
+                break;
         }
     }
 
@@ -259,7 +288,7 @@ class OrderController extends Controller
                 $insert = [];
                 foreach ($manufacturesId as $manufacture_id){
                     foreach ($productsId as $productId) {
-                        $insert[] = ['product_id' => $productId, 'manufacture_id' => $manufacture_id, 'order_id' => $order, 'category_id' => $categoryByProductId[$productId]];
+                        $insert[] = ['product_id' => $productId, 'manufacture_id' => (int) $manufacture_id['manufacture_id'], 'order_id' => $order, 'category_id' => $categoryByProductId[$productId]];
                     }
                 }
 
@@ -294,5 +323,51 @@ class OrderController extends Controller
         }
 
         return $insert;
+    }
+
+    public function addManufacture(Request $request, Order $order){
+        $manufacture_id = (int) $request->manufacture_id;
+        $category_id    = (int) $request->category_id;
+
+        $productsId = OrderManufacture::where('order_id', $order->id)
+            ->where('category_id', $category_id)
+            ->distinct()
+            ->pluck('product_id');
+
+        if (count($productsId) === 0) {
+            $productsId = OrderProduct::whereHas('product', function($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            })
+                ->where('order_id', $order->id)
+                ->distinct()
+                ->pluck('product_id');
+        }
+
+        DB::beginTransaction();
+        try {
+            $insert = [];
+            foreach ($productsId as $productId) {
+                $insert[] = [
+                    "product_id" => $productId,
+                    "manufacture_id" => $manufacture_id,
+                    "category_id" => $category_id,
+                    "order_id" => $order->id,
+                ];
+            }
+
+            if (empty($insert)) {
+                DB::rollBack();
+                throw new \Exception("вставка не может быть пустой!");
+            }
+
+            DB::table('order_manufactures')->insertOrIgnore($insert);
+            $order->touch();
+            DB::commit();
+            return response()->json(["message" => "OK", "order_id" => $order->id]);
+
+        } catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
 }

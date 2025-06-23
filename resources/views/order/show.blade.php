@@ -6,7 +6,7 @@
 
     <div class="d-flex gap-2 align-items-center mb-3">
         <input type="number" min="0" value="{{ $order->amo_lead }}" class="amo_lead form-control w-25" onfocusout="update(this.value, {{ $order->amo_lead }}, 17)">
-        <a href="{{ route('search.product', ['pagination' => 30, 'order_id' => $order->id]) }}" class="btn btn-warning w-50">Добавить к {{ $order->id }}</a>
+        <a href="{{ route('search.product', ['pagination' => 30, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-warning w-50">Добавить продукцию к {{ $order->id }}</a>
         {{--    <button class="btn btn-danger" onclick="downloadFile({{ $order->id }})"> Для КП </button>--}}
         <select class="form-control w-25" onchange="update(this.value, '', 9)">
             @foreach ($statuses as $status)
@@ -38,11 +38,11 @@
         </div>
     @endif
 
-{{--    {{print_r($uniqueCategories)}}--}}
+{{--    {{print_r($manufactures)}}--}}
 
     @foreach($uniqueCategories as $category)
         <h5>
-            {{ $category->name }}
+            <a href="{{ route('search.category', ['pagination' => 30, 'search' => $category->name, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-warning"> {{ $category->name }}</a>
             <button onclick="copyText('{{ $category->name }}')">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-sm">
                     <path fill-rule="evenodd"
@@ -55,7 +55,7 @@
         </h5>
 
         <table class="table table-hover">
-            <thead class="table-dark">
+            <thead class="table-light">
             <tr>
                 <th>Название</th>
                 <th>Длина</th>
@@ -66,6 +66,26 @@
                 <th>Кол-во</th>
                 <th>Цена закупки</th>
                 <th>Цена реализации</th>
+                @isset($manufactures["th"][$category->id])
+                @foreach($manufactures["th"][$category->id] as $manufacture_id => $value)
+                    <th>
+                        {{ $value['name'] }}
+                        <div class="b-popup" id="popup_{{ $manufacture_id }}">
+                            <div class="b-popup-content">
+                                @foreach($value['emails'] as $email)
+                                    <p> email: {{ $email }} </p>
+                                @endforeach
+                                <a href="javascript:closePopUp({{ $manufacture_id }})">Скрыть</a>
+                            </div>
+                        </div>
+                        <span onclick="showPopUp({{ $manufacture_id }})">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 50 50">
+                                <path d="M25,2C12.297,2,2,12.297,2,25s10.297,23,23,23s23-10.297,23-23S37.703,2,25,2z M25,11c1.657,0,3,1.343,3,3s-1.343,3-3,3 s-3-1.343-3-3S23.343,11,25,11z M29,38h-2h-4h-2v-2h2V23h-2v-2h2h4v2v13h2V38z"></path>
+                            </svg>
+                        </span>
+                    </th>
+                @endforeach
+                @endisset
             </tr>
             </thead>
             <tbody>
@@ -125,6 +145,18 @@
                         <br><input type="number" class="money" disabled="disabled" value="{{$product['selling_price'] * $product['quantity']}}">
                     </td>
 
+                    @isset($manufactures["body"][$category->id][$product['id']])
+                        @foreach($manufactures["body"][$category->id][$product['id']] as $manufacture_id => $value)
+                            <td>
+                                <div>
+                                    <p style="margin: 0px;"> Цена: </p> <input type='number' onfocusout="update(this.value, {{ $product['id'] }}, 19, {{ $manufacture_id }})" min='-1' value="{{ $value['price'] }}">
+                                </div>
+                                <div>
+                                    <p style="margin: 0px;"> Комментарий: </p> <input type="text" onfocusout="update(this.value, {{ $product['id'] }}, 20, {{ $manufacture_id }})" value="{{ $value['comment'] }}">
+                                </div>
+                            </td>
+                        @endforeach
+                    @endisset
                 </tr>
             @endforeach
             </tbody>
@@ -135,6 +167,10 @@
 
     <script>
         const csrfToken = $('input[name="_token"]').val();
+
+        $(document).ready(function(){
+            $(".b-popup").hide();
+        });
 
         function copyText(text) {
             var tempInput = document.createElement("textarea");
@@ -149,28 +185,26 @@
             alert("Текст скопирован!!");
         }
 
-        function update(value, product_id, what, id_update = ''){
+        function update(value, product_id, what, update_id = ''){
             $.ajax({
                 url: '/order/' + {{$order->id}},
                 headers: { 'X-CSRF-TOKEN': csrfToken },
                 type: "PUT",
-                data: { value, product_id, id_update, what,},
+                data: { value, product_id, update_id, what,},
                 success: function (response){
-                    // console.log(response);
                 },
                 error: function (){
 
                 }
-                // .done(function(data){
-                //     if (what == 8){
-                //         alert("Комментарий успешно добавлен");
-                //     }
-                //     if(what == 10){
-                //         location.reload();
-                //     }
-                //
-                //     // alert('/order_dd.php?id='+deal);
             });
+        }
+
+        function showPopUp(id_element){
+            $("#popup_"+id_element).show();
+        }
+
+        function closePopUp(id_element){
+            $("#popup_"+id_element).hide();
         }
     </script>
 @endsection

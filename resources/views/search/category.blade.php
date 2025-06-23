@@ -40,6 +40,8 @@
                 </div>
             </div>
 
+            <input type="hidden" name="order_id" id="order_id" value="{{ request('order_id') }}">
+
             {{-- Кнопки действий --}}
             <div class="d-flex justify-content-between">
                 <button type="submit" class="btn btn-primary w-50">Поиск</button>
@@ -180,6 +182,11 @@
 
                     <a href="{{ route('manufacture.fullInformation', $item['id_manufacture']) }}" target="_blank" class="btn btn-sm btn-outline-secondary"> К производителю </a>
 
+                    @if(!empty(request('order_id')))
+                        <button type="button" onclick="addToOrder({{ request('order_id') }}, {{ $item['id_manufacture'] }}, {{ $item['id_category'] }})" class="btn btn-sm btn-outline-warning mb-1 mt-1">
+                            К заказу № {{ request('order_id') }}
+                        </button>
+                    @endif
                 </td>
 
             </tr>
@@ -384,6 +391,31 @@
             });
 
         });
+
+        function addToOrder(order_id, manufacture_id, category_id){
+            $.ajax({
+                url: '/order/addManufacture/' + order_id,
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                type: "POST",
+                data: {manufacture_id, category_id,},
+                success: function (response){
+                    // console.log(response);
+                    alert(response.message);
+                },
+                error: function (){
+
+                }
+                // .done(function(data){
+                //     if (what == 8){
+                //         alert("Комментарий успешно добавлен");
+                //     }
+                //     if(what == 10){
+                //         location.reload();
+                //     }
+                //
+                //     // alert('/order_dd.php?id='+deal);
+            });
+        }
 
     </script>
 @endsection

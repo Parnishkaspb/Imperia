@@ -118,7 +118,6 @@ Route::middleware(CheckIp::class)->group(function () {
         });
     });
 
-
     Route::middleware(['auth', CheckRole::class . ':1'])->group(function () {
         Route::prefix('admin')->group(function () {
             Route::get('/', [AdminController::class, 'index'])->name('admin.index');
@@ -163,6 +162,7 @@ Route::middleware(CheckIp::class)->group(function () {
                 Route::delete('/{order}/{what}/{value}', 'deleteSm')->name('order.delete.sm');
                 Route::put('/{order}', 'update')->name('order.update.sm');
 
+                Route::post('/addManufacture/{order}', 'addManufacture')->name('order.add.manufacture');
 
                 Route::post('/product', 'workWithProductToRedis')->name('order.product.redis');
                 Route::post('/productC', 'workWithProductToRedisGet')->name('order.product.redis.get');
