@@ -38,7 +38,11 @@
         </div>
     @endif
 
-{{--    {{print_r($manufactures)}}--}}
+    <?php
+        $totalBuy = 0;
+        $totalSell = 0;
+        $totalWeight = 0;
+    ?>
 
     @foreach($uniqueCategories as $category)
         <h5>
@@ -157,12 +161,68 @@
                             </td>
                         @endforeach
                     @endisset
+
+                        <?php
+                        $totalBuy += $product['buying_price'] * $product['quantity'];
+                        $totalSell += $product['selling_price'] * $product['quantity'];
+                        $totalWeight += $product['weight'] * $product['quantity'];
+                        ?>
                 </tr>
             @endforeach
             </tbody>
         </table>
 
     @endforeach
+
+    <table class='table' style="width: 30%; text-align: center;">
+        <thead class='table-light'>
+        <tr>
+            <td>Цена Закупки</td>
+            <td>Цена Реализации</td>
+            <td>Заработок с заказа</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ $totalBuy }}</td>
+            <td>{{ $totalSell }}</td>
+            <td
+                @if ($totalSell - $totalBuy >= 0) style="color: #009a63" @else  style="color: red" @endif >
+                {{ $totalSell - $totalBuy }}/
+                @php
+//                    $totalUS = $summOrder['totalUS'] + $summDelivery['totalPrice'];
+//                    $totalTO = $summOrder['totalTO'] + $summDelivery['totalSellPrice'];
+                    if ($totalBuy != 0) {
+                        $percent = round((($totalSell - $totalBuy) / $totalBuy) * 100, 2);
+                    } else {
+                        $percent = 0;
+                    }
+                @endphp
+                {{ $percent }}%
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table class='table' style="width: 30%; text-align: center;">
+        <thead class='table-light'>
+        <tr>
+            <td>Информация</td>
+            <td>О заказе</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td></td>
+            <td>
+                Общий вес: {{ $totalWeight }}
+                <br>Количество 20т машин - {{ round($totalWeight / 20000) }}
+                <br>Количество 10т машин - {{ round($totalWeight / 10000) }}
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
 
 
     <script>
