@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderManufacture;
 use App\Models\OrderProduct;
 use App\Models\OrderStatus;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -85,7 +86,7 @@ class OrderController extends Controller
 
         foreach ($orderManufacture as $manufacture) {
             if (!isset($tmp["th"][$manufacture->manufacture_id])) {
-                $tmp["th"][$manufacture->category_id][$manufacture->manufacture_id] = $manufactures[$manufacture->manufacture_id];
+                $tmp["th"][$manufacture->category_id][$manufacture->manufacture_id] = [ ...$manufactures[$manufacture->manufacture_id], "delete_id" => $manufacture->id];
             }
 
             $tmp["body"][$manufacture->category_id][$manufacture->product_id][$manufacture->manufacture_id] = [
@@ -101,7 +102,7 @@ class OrderController extends Controller
         return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures'));
     }
 
-    public function deleteSm(Request $request, $orderId, $what, $value)
+    public function delete(Request $request, $orderId, $what, $value)
     {
 
         switch ($what) {
@@ -121,6 +122,21 @@ class OrderController extends Controller
 
                 $order->touch();
                 break;
+
+            case 18:
+                $orderManufacture = OrderManufacture::find($value);
+                $productsId = OrderManufacture::select('product_id')->where('order_id', $orderId)->where('manufacture_id', $orderManufacture->manufacture_id)->get()->toArray();
+
+                $categoryId = Product::where('id', $orderManufacture->product_id)->value('category_id');
+
+                $needProductIds = Product::whereIn('id', $productsId)
+                    ->where('category_id', $categoryId)
+                    ->pluck('id')
+                    ->toArray();
+
+                OrderManufacture::whereIn('product_id', $needProductIds)->where('manufacture_id', $orderManufacture->manufacture_id)->where('order_id', $orderId)->delete();
+                break;
+
         }
 
         return redirect()->back();

@@ -159,7 +159,7 @@ Route::middleware(CheckIp::class)->group(function () {
 //                Route::delete('/{carrier}', 'destroy')->name('carrier.destroy');
                 Route::get('/{order}', 'show')->name('order.show');
 
-                Route::delete('/{order}/{what}/{value}', 'deleteSm')->name('order.delete.sm');
+                Route::delete('/{order}/{what}/{value}', 'delete')->name('order.delete.sm');
                 Route::put('/{order}', 'update')->name('order.update.sm');
 
                 Route::post('/addManufacture/{order}', 'addManufacture')->name('order.add.manufacture');
