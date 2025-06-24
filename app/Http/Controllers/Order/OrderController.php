@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Order;
 use App\Http\Controllers\Controller;
 use App\Models\Manufacture;
 use App\Models\Order;
+use App\Models\OrderDelivery;
 use App\Models\OrderManufacture;
 use App\Models\OrderProduct;
 use App\Models\OrderStatus;
@@ -33,7 +34,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['status', 'orderProducts.product.category', 'orderManufacture']);
+        $order->load(['status', 'orderProducts.product.category', 'orderManufacture', "deliveries"]);
         $statuses = OrderStatus::all();
 
         $uniqueCategories = collect();
@@ -98,8 +99,15 @@ class OrderController extends Controller
         $manufactures = $tmp;
         unset($tmp);
 
+        $deliveries = (object) $order->deliveries;
 
-        return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures'));
+        $moneyDelivery = $order->deliveries?->reduce(function ($carry, $delivery) {
+            $carry["buying_sum"] += $delivery->buying_price * $delivery->count;
+            $carry["selling_sum"] += $delivery->selling_price * $delivery->count;
+            return $carry;
+        }, ["buying_sum" => 0, "selling_sum" => 0]);
+
+        return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures', 'deliveries', 'moneyDelivery',));
     }
 
     public function delete(Request $request, $orderId, $what, $value)
@@ -137,6 +145,11 @@ class OrderController extends Controller
                 OrderManufacture::whereIn('product_id', $needProductIds)->where('manufacture_id', $orderManufacture->manufacture_id)->where('order_id', $orderId)->delete();
                 break;
 
+            case 20:
+                OrderDelivery::find($value)->delete();
+                Order::find($orderId)->touch();
+                break;
+
         }
 
         return redirect()->back();
@@ -145,44 +158,66 @@ class OrderController extends Controller
     public function update(Request $request, Order $order){
         switch ($request->what){
             case 2:
-                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update(['quantity' => (int) $request->value]);
-                $order->touch();
-                break;
-
             case 3:
-                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update(['buying_price' => (int) $request->value]);
-                $order->touch();
-                break;
-
             case 4:
-                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update(['selling_price' => (int) $request->value]);
-                $order->touch();
+                $key = match ((int) $request->what){
+                    2 => "quantity",
+                    3 => "buying_price",
+                    4 => "selling_price",
+                };
+
+                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update([$key => (int) $request->value]);
+
                 break;
 
             case 9:
                 $order->status_id = (int) $request->value;
-                $order->save();
                 break;
+
+            case 10:
+                OrderDelivery::create([
+                    "order_id" => $order->id,
+                ]);
+
+                break;
+
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+                $key = match ((int) $request->what){
+                    11 => "from",
+                    12 => "to",
+                    13 => "buying_price",
+                    14 => "selling_price",
+                    15 => "count",
+                };
+
+                OrderDelivery::find((int) $request->update_id)->update([
+                    $key => $request->value,
+                ]);
+
+                break;
+
 
             case 17:
                 $order->amo_lead = (int) $request->value;
-                $order->save();
                 break;
 
             case 19:
-                OrderManufacture::where('order_id', (int) $order->id)->where('product_id', (int) $request->product_id)->where('manufacture_id', (int) $request->update_id)->update([
-                   "price" => (int) $request->value,
-                ]);
-                $order->touch();
-                break;
-
             case 20:
+                $key = match ((int) $request->what){
+                    19 => "price",
+                    20 => "comment",
+                };
                 OrderManufacture::where('order_id', (int) $order->id)->where('product_id', (int) $request->product_id)->where('manufacture_id', (int) $request->update_id)->update([
-                    "comment" => (string) $request->value,
+                    $key => $request->value,
                 ]);
-                $order->touch();
                 break;
         }
+
+        $order->touch();
     }
 
     public function workWithProductToRedis(Request $request)

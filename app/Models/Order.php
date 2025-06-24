@@ -35,4 +35,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderManufacture::class, 'order_id');
     }
+
+    public function deliveries() : HasMany
+    {
+        return $this->hasMany(OrderDelivery::class, 'order_id');
+    }
 }

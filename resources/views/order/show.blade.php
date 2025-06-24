@@ -39,15 +39,15 @@
     @endif
 
     <?php
-        $totalBuy = 0;
-        $totalSell = 0;
+        $totalBuy = $moneyDelivery["buying_sum"] ?? 0;
+        $totalSell = $moneyDelivery["selling_sum"] ?? 0;
         $totalWeight = 0;
     ?>
 
     @foreach($uniqueCategories as $category)
         <h5>
-            <a href="{{ route('search.category', ['pagination' => 30, 'search' => $category->name, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-warning"> {{ $category->name }}</a>
-            <button onclick="copyText('{{ $category->name }}')">
+            <a href="{{ route('search.category', ['pagination' => 30, 'search' => $category->name, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-outline-success"> {{ $category->name }}</a>
+            <button onclick="copyText('{{ $category->name }}')" class="btn btn-sm btn-outline-primary">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-sm">
                     <path fill-rule="evenodd"
                           clip-rule="evenodd"
@@ -247,6 +247,58 @@
         </tbody>
     </table>
 
+{{--    {{ print_r($deliveries) }}--}}
+
+    <table class='table' style="width: 60%; text-align: center;">
+        <thead class='table-light'>
+        <tr>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="update({{ $order->id }}, {{ $order->id }}, 10)">
+                     Добавить доставку
+                </button>
+            </td>
+            <td>Откуда</td>
+            <td>Куда</td>
+            <td>Закупка</td>
+            <td>Реализация</td>
+            <td>Кол-во</td>
+            <td>Удалить</td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($deliveries as $delivery)
+            <tr>
+                <td></td>
+                <td><input type="text" onfocusout="update(this.value, 1, 11, {{$delivery->id}})" value="{{$delivery->from}}"></td>
+                <td><input type="text" onfocusout="update(this.value, 1, 12, {{$delivery->id}})" value="{{$delivery->to}}"></td>
+                <td><input type="number"  class="money" onfocusout="update(this.value, 1, 13, {{$delivery->id}})" value="{{$delivery->buying_price}}"></td>
+                <td><input type="number"  class="money" onfocusout="update(this.value, 1, 14, {{$delivery->id}})" value="{{$delivery->selling_price}}"></td>
+                <td><input type="number" min="1" class="input_number" onfocusout="update(this.value, 1, 15, {{$delivery->id}})" value="{{$delivery->count}}"></td>
+                <td>
+                    <form action="{{ route('order.delete.sm', [$order->id, 20, $delivery->id]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить доставку?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-trash" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1
+                                    .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3
+                                    .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0
+                                          1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0
+                                          1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0
+                                          1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118
+                                          4 4 4.059V13a1 1 0 0 0 1
+                                          1h6a1 1 0 0 0 1-1V4.059L11.882
+                                          4H4.118zM2.5 3V2h11v1h-11z"/>
+                            </svg>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
 
     <script>
         const csrfToken = $('input[name="_token"]').val();
@@ -275,6 +327,11 @@
                 type: "PUT",
                 data: { value, product_id, update_id, what,},
                 success: function (response){
+                    switch (what){
+                        case 10:
+                            location.reload()
+                            break;
+                    }
                 },
                 error: function (){
 
