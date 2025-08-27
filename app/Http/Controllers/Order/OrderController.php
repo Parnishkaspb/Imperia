@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -34,6 +35,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        Gate::authorize('view', $order);
+
         $order->load(['status', 'orderProducts.product.category', 'orderManufacture', "deliveries"]);
         $statuses = OrderStatus::all();
 
@@ -121,8 +124,9 @@ class OrderController extends Controller
 
                 $order = Order::find($orderId);
 
-                $this->authorize('deleteProduct', [$order, $orderProduct]);
-
+                if (Gate::denies('deleteProduct', [OrderProduct::class, $order, $orderProduct])) {
+                    abort(403);
+                }
                 $orderProduct->delete();
 
                 $string = Auth::user()->name . "удалил продукт(".$value.") в заказе" . $order->id;

@@ -21,7 +21,12 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return $user->id === $order->user_id || in_array($user->role_id, [1, 2, 3, 5]) ;
+        $allowedRoles = [
+            1, // Админ
+            2, // Руковод Отдела продаж
+            5, // Логист
+        ];
+        return $user->id === $order->user_id || in_array($user->role_id, $allowedRoles);
     }
 
     /**
