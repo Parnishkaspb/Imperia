@@ -83,9 +83,14 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $logstring = Auth::user()->name . ' удалил пользователя (' . $user->id . ') с именем: ' . $user->name . ', фамилией: ' . $user->surname;
+        $logstring = Auth::user()->name . ' уволил пользователя (' . $user->id . ') с именем: ' . $user->name . ', фамилией: ' . $user->surname;
 
-        $user->delete();
+        $user->update([
+            'email'    => "deleteduser@imperiajbi.ru",
+            'password' => "deleteduser",
+            'is_work'  => false,
+        ]);
+
         Log::info($logstring);
         return redirect()->route('admin.index')->with('success', 'Пользователь был удален');
     }
