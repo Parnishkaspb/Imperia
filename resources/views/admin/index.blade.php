@@ -36,10 +36,10 @@
                             Редактировать
                         </a>
                         <form method="POST" action="{{ route('user.destroy', $user->id) }}" class="d-inline"
-                              onsubmit="return confirm('Вы уверены, что хотите удалить пользователя?');">
+                              onsubmit="return confirm('Вы уверены, что хотите уволить пользователя?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Уволить</button>
                         </form>
                     </td>
                 </tr>
