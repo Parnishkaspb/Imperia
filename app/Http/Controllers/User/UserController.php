@@ -86,7 +86,7 @@ class UserController extends Controller
         $logstring = Auth::user()->name . ' уволил пользователя (' . $user->id . ') с именем: ' . $user->name . ', фамилией: ' . $user->surname;
 
         $user->update([
-            'email'    => "deleteduser@imperiajbi.ru",
+            'email'    => "deleteduser". Auth::user()->id ."@imperiajbi.ru",
             'password' => "deleteduser",
             'is_work'  => false,
         ]);
