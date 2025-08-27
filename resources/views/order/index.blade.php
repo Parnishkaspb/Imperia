@@ -18,60 +18,45 @@
         </div>
     @endif
 
-{{--    <form action="{{ route('carrier.index') }}" method="GET" class="mb-4">--}}
-{{--        <div class="row g-3 align-items-end">--}}
+    @if(Auth::user()->role_id !== 4)
+        <form action="{{ route('order.index') }}" method="GET" class="mb-4">
+            <div class="row g-3 align-items-end">
 
-{{--            <div class="col-md-4">--}}
-{{--                <label for="search" class="form-label">Поиск по имени, телефону или почте</label>--}}
-{{--                <input type="text" name="search" id="search" class="form-control"--}}
-{{--                       placeholder="Введите имя, телефон или почту..." value="{{ request('search') }}">--}}
-{{--            </div>--}}
+                {{--            <div class="col-md-4">--}}
+                {{--                <label for="search" class="form-label">Поиск по имени, телефону или почте</label>--}}
+                {{--                <input type="text" name="search" id="search" class="form-control"--}}
+                {{--                       placeholder="Введите имя, телефон или почту..." value="{{ request('search') }}">--}}
+                {{--            </div>--}}
 
-{{--            <div class="col-md-2">--}}
-{{--                <label for="type_car" class="form-label">Тип авто</label>--}}
-{{--                <select class="form-select" id="type_car" name="type_car">--}}
-{{--                    <option value=""> Все авто </option>--}}
-{{--                    @foreach($types as $type)--}}
-{{--                        <option value="{{ $type->id }}" {{ (int) request('type_car') === (int) $type->id ? 'selected' : '' }}>--}}
-{{--                            {{ $type->type }}--}}
-{{--                        </option>--}}
-{{--                    @endforeach--}}
-{{--                </select>--}}
-{{--            </div>--}}
-{{--            <div class="col-md-2">--}}
-{{--                <label for="dist" class="form-label">Фед. округ</label>--}}
-{{--                <select class="form-select" id="dist" name="dist">--}}
-{{--                    <option value="">Выберите</option>--}}
-{{--                </select>--}}
-{{--            </div>--}}
+                <div class="col-md-6">
+                    <label for="type_car" class="form-label">Ответственные</label>
+                    <select class="form-select" id="user" name="user">
+                        <option value=""> Все ответственные </option>
+                        @foreach($users as $user_id => $user_full_name)
+                            <option value="{{ $user_id }}" {{ (int) request('user') === (int) $user_id ? 'selected' : '' }}>
+                                {{ $user_full_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-{{--            <div class="col-md-2">--}}
-{{--                <label for="region" class="form-label">Регион</label>--}}
-{{--                <select class="form-select" id="region" name="region">--}}
-{{--                    <option value="">Выберите</option>--}}
-{{--                </select>--}}
-{{--            </div>--}}
+                <div class="col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                    <a href="{{ route('order.index') }}" class="btn btn-outline-secondary w-100">Сброс</a>
+                </div>
 
-{{--            <div class="col-md-2">--}}
-{{--                <label for="city" class="form-label">Город</label>--}}
-{{--                <select class="form-select" id="city" name="city">--}}
-{{--                    <option value="">Выберите</option>--}}
-{{--                </select>--}}
-{{--            </div>--}}
-
-{{--            <div class="col-md-2 d-flex gap-2">--}}
-{{--                <button type="submit" class="btn btn-primary w-100">Поиск</button>--}}
-{{--                <a href="{{ route('carrier.index') }}" class="btn btn-outline-secondary w-100">Сброс</a>--}}
-{{--            </div>--}}
-
-{{--        </div>--}}
-{{--    </form>--}}
+            </div>
+        </form>
+    @endif
 
     <table class="table table-hover">
         <thead class="table-dark">
         <tr>
             <th>ID заказа</th>
             <th>ID амо</th>
+            @if(Auth::user()->role_id !== 4)
+                <th>Ответственный</th>
+            @endif
             <th>Дата создания</th>
             <th>Дата изменения</th>
             <th>Статус</th>
@@ -88,6 +73,12 @@
                 <td>
                     {{ ($order->amo_lead === 0) ? "" : $order->amo_lead }}
                 </td>
+
+                @if(Auth::user()->role_id !== 4)
+                    <td>
+                        {{ $users[$order->user_id] ?? "" }}
+                    </td>
+                @endif
 
                 <td>
                     {{ $order->created_at }}

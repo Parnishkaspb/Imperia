@@ -10,6 +10,7 @@ use App\Models\OrderManufacture;
 use App\Models\OrderProduct;
 use App\Models\OrderStatus;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -19,18 +20,22 @@ use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (Auth::user()->role_id === 4){
             $orders = Order::with(['status'])->where('user_id', Auth::user()->id);
         } else {
-            $orders = Order::with(['status']);
+            $user_id = $request->user ?? null;
+            $orders = Order::with(['status'])->when(isset($user_id), fn ($query) => $query->where('user_id', $user_id));
+            $users = User::where("is_work", 1)
+                ->selectRaw("id, CONCAT(name, ' ', surname) AS full_name")
+                ->pluck('full_name', 'id');
         }
 
         $orders = $orders->orderBy('id', 'DESC')
             ->paginate(30);
 
-        return view('order.index', compact('orders'));
+        return view('order.index', compact('orders', 'users'));
     }
 
     public function show(Order $order)
