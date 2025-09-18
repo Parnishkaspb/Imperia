@@ -29,7 +29,7 @@
                         </li>
                     @endif
 
-                    @if(in_array(Auth::user()->role_id, [1, 2, 3]))
+                    @if(in_array(Auth::user()->role_id, [1, 2, 3, 4]))
                         <li class="nav-item">
                             <a class="nav-link" href="/search/category?pagination=30">Поиск по производителям</a>
                         </li>

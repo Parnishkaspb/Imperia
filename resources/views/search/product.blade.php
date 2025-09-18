@@ -87,7 +87,9 @@
             <th>Высота</th>
             <th>Вес</th>
             <th>Категория</th>
-            <th>Действия</th>
+            @if(in_array(Auth::user()->role_id, [1, 2]))
+                <th>Действия</th>
+            @endif
         </tr>
         </thead>
         <tbody>
@@ -122,11 +124,12 @@
                 <td>
                     {{ $result->category?->name }}
                 </td>
-
-                <td>
-                    <a href="{{ route('edit.show.category', ['category' => $result->category?->id]) }}" target="_blank" class="btn btn-outline-danger mt-2"> Изменить категорию </a>
-                    <a href="{{ route('edit.show.product', ['product' => $result->id]) }}" target="_blank" class="btn btn-outline-danger"> Изменить продукцию </a>
-                </td>
+                @if(in_array(Auth::user()->role_id, [1, 2]))
+                    <td>
+                        <a href="{{ route('edit.show.category', ['category' => $result->category?->id]) }}" target="_blank" class="btn btn-outline-danger mt-2"> Изменить категорию </a>
+                        <a href="{{ route('edit.show.product', ['product' => $result->id]) }}" target="_blank" class="btn btn-outline-danger"> Изменить продукцию </a>
+                    </td>
+                @endif
             </tr>
         @endforeach
         </tbody>
