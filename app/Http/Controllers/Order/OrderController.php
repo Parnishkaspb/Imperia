@@ -24,6 +24,7 @@ class OrderController extends Controller
     {
         if (Auth::user()->role_id === 4){
             $orders = Order::with(['status'])->where('user_id', Auth::user()->id);
+            $users = [];
         } else {
             $user_id = $request->user ?? null;
             $orders = Order::with(['status'])->when(isset($user_id), fn ($query) => $query->where('user_id', $user_id));
