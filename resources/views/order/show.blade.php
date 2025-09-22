@@ -6,7 +6,10 @@
 
     <div class="d-flex gap-2 align-items-center mb-3">
         <input type="number" min="0" value="{{ $order->amo_lead }}" class="amo_lead form-control w-25" onfocusout="update(this.value, {{ $order->amo_lead ?? 0 }}, 17)">
-        <a href="{{ route('search.product', ['pagination' => 30, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-warning w-50">Добавить продукцию к {{ $order->id }}</a>
+        @if(Auth::user()->id === $order->user_id)
+            <a href="{{ route('search.product', ['pagination' => 30, 'order_id' => $order->id]) }}" target="_blank" class="btn btn-warning w-50">Добавить продукцию к {{ $order->id }}</a>
+
+        @endif
         {{--    <button class="btn btn-danger" onclick="downloadFile({{ $order->id }})"> Для КП </button>--}}
         <select class="form-control w-25" onchange="update(this.value, '', 9)">
             @foreach ($statuses as $status)
