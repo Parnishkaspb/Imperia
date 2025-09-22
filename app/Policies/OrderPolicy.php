@@ -24,6 +24,7 @@ class OrderPolicy
         $allowedRoles = [
             1, // Админ
             2, // Руковод Отдела продаж
+            3, // Снабженец
             5, // Логист
         ];
         return $user->id === $order->user_id || in_array($user->role_id, $allowedRoles);
