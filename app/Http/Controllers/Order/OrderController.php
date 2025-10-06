@@ -89,7 +89,6 @@ class OrderController extends Controller
                 $key = $item->product_id . '_' . $item->manufacture_id;
                 return [$key => $item];
             })->toArray();
-//        dd($mp);
 
         $manufactures = Manufacture::with(['emails'])->whereIn('id', $manufactures)->get();
         $manufactures = $manufactures->keyBy('id')->map(function ($manufacture) {
