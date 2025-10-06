@@ -190,7 +190,7 @@
                             @foreach($manufactures["body"][$category->id][$product['id']] as $manufacture_id => $value)
                                 <td>
                                     <div>
-                                        <p style="margin: 0px;"> Цена: </p> <input type='number' @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 19, {{ $manufacture_id }})" @else disabled="disabled" @endcan  min='-1' value="{{ $value['price'] }}" placeholder="цена">
+                                        <p style="margin: 0px;"> Цена: </p> <input type='number' @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 19, {{ $manufacture_id }})" @else disabled="disabled" @endcan  min='-1' value="{{ $value['price'] }}" placeholder="{{ $manufacture_product[$product['id']. '_' . $manufacture_id]['price'] ?? "Нет реком. цены"}}">
                                     </div>
                                     <div>
                                         <p style="margin: 0px;"> Комментарий: </p> <input type="text" @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 20, {{ $manufacture_id }})" @else disabled="disabled" @endcan value="{{ $value['comment'] }}">

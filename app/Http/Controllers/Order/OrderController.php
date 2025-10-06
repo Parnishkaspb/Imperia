@@ -84,15 +84,12 @@ class OrderController extends Controller
         $manufactures = array_unique(array_column($orderManufacture->toArray(), 'manufacture_id'));
 
 
-        $mp = ManufactureProduct::whereIn('manufacture_id', $manufactures)->whereIn('product_id', array_column($productsData->toArray(), 'id'))->get()
-        ->map(function ($item) {
-            return [
-                $item->product_id => [
-                    $item->manufacture_id => $item->price
-                ],
-            ];
-        })->toArray();
-        dd($mp);
+        $manufacture_product = ManufactureProduct::whereIn('manufacture_id', $manufactures)->whereIn('product_id', array_column($productsData->toArray(), 'id'))->get()
+            ->mapWithKeys(function ($item) {
+                $key = $item->product_id . '_' . $item->manufacture_id;
+                return [$key => $item];
+            })->toArray();
+//        dd($mp);
 
         $manufactures = Manufacture::with(['emails'])->whereIn('id', $manufactures)->get();
         $manufactures = $manufactures->keyBy('id')->map(function ($manufacture) {
@@ -129,7 +126,7 @@ class OrderController extends Controller
             return $carry;
         }, ["buying_sum" => 0, "selling_sum" => 0]);
 
-        return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures', 'deliveries', 'moneyDelivery',));
+        return view('order.show', compact('order', 'statuses', 'uniqueCategories', 'products', 'manufactures', 'deliveries', 'moneyDelivery', 'manufacture_product'));
     }
 
     public function delete(Request $request, $orderId, $what, $value)
