@@ -357,5 +357,4 @@ class ManufactureController extends Controller
             'countData'  => count($existingData)
         ], Response::HTTP_ACCEPTED);
     }
-
 }

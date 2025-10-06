@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Edit;
 
 use App\Models\Manufacture;
+use App\Models\ManufactureProduct;
 use Illuminate\Support\Facades\{Auth, Log};
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -48,9 +49,34 @@ class ProductController extends Controller
                 'id' => $mp->id,
                 'name' => $mp->product->name,
                 'doit' => $mp->doit,
+                'price' => $mp->price
             ];
         });
 
         return response()->json(['products' => $filteredProducts->values()], 200);
+    }
+
+    public function updatePrice(Request $request, $manufacture, $product_id)
+    {
+        $mp = ManufactureProduct::find($product_id);
+
+        if ($mp->manufacture_id !== (int) $manufacture) {
+            return response()->json([
+                "message" => "Техническая ошибка! Обратитесь к админу"
+            ], 500);
+        }
+
+        try {
+            $mp->update([
+                "price" => (int) $request->price,
+            ]);
+
+            return response()->json(["message" => "Успешное обновление цены"], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => fprintf("Ошибка: %s", $e->getMessage())
+            ], 500);
+        }
+
     }
 }

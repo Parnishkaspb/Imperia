@@ -108,11 +108,12 @@
             @endforeach
             </tbody>
         </table>
-        <table class="table" style="width: 50%; display: none"  id="products">
+        <table class="table" style="width: 50%; display: none; text-align: center"  id="products">
             <thead class="table-warning">
             <tr>
                 <th>Название</th>
                 <th>Делает</th>
+                <th>Цена</th>
                 <th>Действие</th>
             </tr>
             </thead>
@@ -124,6 +125,12 @@
                         <button class="btn btn-sm btn-outline-{{($product->doit) ? "warning" : "danger" }}" id="yesno" data-name="product" data-id="{{$product->id}}">
                             {{ $product->doit ? "Да" : "Нет" }}
                         </button>
+                    </td>
+                    <td>
+                        <input type="number" min="1" class="form-control" value="{{$product->price}}" onblur="updatePrice(this.value, {{$product->id}})">
+{{--                        <button class="btn btn-sm btn-outline-{{($product->doit) ? "warning" : "danger" }}" id="yesno" data-name="product" data-id="{{$product->id}}">--}}
+{{--                            {{ $product->doit ? "Да" : "Нет" }}--}}
+{{--                        </button>--}}
                     </td>
                     <td>
                         <form method="POST" action="{{ route('manufacture.pc.delete', [$product->id, 'product']) }}" class="d-inline"
@@ -394,6 +401,27 @@
                 });
             });
         });
+
+        function updatePrice(value, manucature_product_id){
+            {{--alert(value, manucature_product_id, {{$manufacture->id}})--}}
+
+            $.ajax({
+                url: '/manufacture/product/'+ {{$manufacture->id}} +'/' + manucature_product_id + '/price',
+                method: 'PUT',
+                data:{
+                    price: value
+                },
+                headers: {
+                    'X-CSRF-TOKEN': "{{csrf_token()}}"
+                },
+                success: function(response) {
+                    console.log(response.message);
+                },
+                error: function(xhr) {
+                    alert('Ошибка: ' + xhr.response.message);
+                }
+            });
+        }
 
     </script>
 @endsection

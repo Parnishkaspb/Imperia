@@ -78,6 +78,8 @@ Route::middleware(CheckIp::class)->group(function () {
 
             Route::controller(ProductController::class)->group(function () {
                 Route::get('/product/{manufacture}/{category}', 'showProductsByManufacture')->name('product.index');
+                Route::put('/product/{manufacture}/{product_id}/price', 'updatePrice');
+
             });
         });
 
@@ -102,6 +104,10 @@ Route::middleware(CheckIp::class)->group(function () {
                 Route::post('/cfind', 'searchCategoryJson');
 
                 Route::get('/product', 'searchProductView')->name('search.product');
+            });
+
+            Route::controller(ProductController::class)->group(function () {
+                Route::put('/manufacture/product/{manufacture}/{product_id}/price', 'updatePrice');
             });
         });
 

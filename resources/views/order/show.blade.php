@@ -74,6 +74,7 @@
                 <th>Кол-во</th>
                 <th>Цена закупки</th>
                 <th>Цена реализации</th>
+                @can('updatePrices', $order)
                 @isset($manufactures["th"][$category->id])
                 @foreach($manufactures["th"][$category->id] as $manufacture_id => $value)
                     <th>
@@ -119,6 +120,7 @@
                     </th>
                 @endforeach
                 @endisset
+                @endcan
             </tr>
             </thead>
             <tbody>
@@ -170,7 +172,7 @@
                     </td>
 
                     <td>
-                        <input type="number" class="input_number" @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 2)" @else disabled="disabled" @endcan min='1' value="{{$product['quantity']}}">
+                        <input type="number" class="input_number" @can('updateQuantity', $order) onfocusout="update(this.value, {{ $product['id'] }}, 2)" @else disabled="disabled" @endcan min='1' value="{{$product['quantity']}}">
                     </td>
 
                     <td>
@@ -183,18 +185,20 @@
                         <br><input type="number" class="money" disabled="disabled" value="{{$product['selling_price'] * $product['quantity']}}">
                     </td>
 
-                    @isset($manufactures["body"][$category->id][$product['id']])
-                        @foreach($manufactures["body"][$category->id][$product['id']] as $manufacture_id => $value)
-                            <td>
-                                <div>
-                                    <p style="margin: 0px;"> Цена: </p> <input type='number' onfocusout="update(this.value, {{ $product['id'] }}, 19, {{ $manufacture_id }})" min='-1' value="{{ $value['price'] }}">
-                                </div>
-                                <div>
-                                    <p style="margin: 0px;"> Комментарий: </p> <input type="text" onfocusout="update(this.value, {{ $product['id'] }}, 20, {{ $manufacture_id }})" value="{{ $value['comment'] }}">
-                                </div>
-                            </td>
-                        @endforeach
-                    @endisset
+                    @can('updatePrices', $order)
+                        @isset($manufactures["body"][$category->id][$product['id']])
+                            @foreach($manufactures["body"][$category->id][$product['id']] as $manufacture_id => $value)
+                                <td>
+                                    <div>
+                                        <p style="margin: 0px;"> Цена: </p> <input type='number' @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 19, {{ $manufacture_id }})" @else disabled="disabled" @endcan  min='-1' value="{{ $value['price'] }}" placeholder="цена">
+                                    </div>
+                                    <div>
+                                        <p style="margin: 0px;"> Комментарий: </p> <input type="text" @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 20, {{ $manufacture_id }})" @else disabled="disabled" @endcan value="{{ $value['comment'] }}">
+                                    </div>
+                                </td>
+                            @endforeach
+                        @endisset
+                    @endcan
 
                         <?php
                         $totalBuy += $product['buying_price'] * $product['quantity'];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Order;
 
 use App\Http\Controllers\Controller;
 use App\Models\Manufacture;
+use App\Models\ManufactureProduct;
 use App\Models\Order;
 use App\Models\OrderDelivery;
 use App\Models\OrderManufacture;
@@ -81,6 +82,18 @@ class OrderController extends Controller
         $orderManufacture = OrderManufacture::where('order_id', $order->id)->get();
 
         $manufactures = array_unique(array_column($orderManufacture->toArray(), 'manufacture_id'));
+
+
+        $mp = ManufactureProduct::whereIn('manufacture_id', $manufactures)->whereIn('product_id', array_column($productsData->toArray(), 'id'))->get()
+        ->map(function ($item) {
+            return [
+                $item->product_id => [
+                    $item->manufacture_id => $item->price
+                ],
+            ];
+        })->toArray();
+        dd($mp);
+
         $manufactures = Manufacture::with(['emails'])->whereIn('id', $manufactures)->get();
         $manufactures = $manufactures->keyBy('id')->map(function ($manufacture) {
             return [

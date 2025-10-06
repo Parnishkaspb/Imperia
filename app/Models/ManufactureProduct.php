@@ -13,6 +13,7 @@ class ManufactureProduct extends Model
         'manufacture_id',
         'product_id',
         'doit',
+        'price',
     ];
 
     public function product(): BelongsTo

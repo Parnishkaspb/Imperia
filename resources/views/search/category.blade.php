@@ -333,6 +333,7 @@
                             '<th>Название</th>' +
                             '<th>Делает</th>' +
                             '<th>Действие</th>' +
+                            '<th>Цена</th>' +
                             '</tr></thead><tbody>';
 
                         response.products.forEach(product => {
@@ -355,6 +356,12 @@
                                         <input type="hidden" name="_method" value="DELETE">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
                                     </form>
+                                </td>
+                                <td>
+                                    <div class="d-inline" data-product-id="${product.id}" data-csrf-token="${csrfToken}" data-manufacture-id=${id_manufacture}>
+                                        <input type="number" min="1" name="price" style="width: 50%" value="${product.price}">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">Изменить</button>
+                                    </div>
                                 </td>
                             </tr>`;
                         });
@@ -417,5 +424,34 @@
             });
         }
 
+        $(document).on('click', '.btn-outline-primary', function() {
+            const container = $(this).closest('.d-inline');
+            const price = container.find('input[name="price"]').val();
+            const productId = container.data('product-id');
+            const manufactureId = container.data('manufacture-id');
+            const csrfToken = container.data('csrf-token');
+
+            if (!price || price < 1) {
+                alert('Пожалуйста, введите корректную цену');
+                return;
+            }
+
+            $.ajax({
+                url: `manufacture/product/${manufactureId}/${productId}/price`,
+                type: 'PUT',
+                data: {
+                    price: price,
+                    _token: csrfToken,
+                    _method: 'PUT'
+                },
+                success: function(response) {
+                    alert(response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка');
+                }
+            });
+        });
     </script>
 @endsection

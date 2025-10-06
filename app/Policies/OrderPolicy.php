@@ -48,10 +48,20 @@ class OrderPolicy
 
     /**
      * Determine whether the user can updatePrices the model.
-     * (Сделано для того, чтобы только сам человек или админ мог поменять: Кол-во товара, цену за которую купили, цену за которую продали.
-     * Никто кроме 2-ух человек не может этого сдлетаь)
+     * (Сделано для того, чтобы только Снабженец, ROP и админ мог поменять: Кол-во товара, цену за которую купили, цену за которую продали.
+     * Никто кроме 3-ех человек не может этого сделать)
      */
     public function updatePrices(User $user, Order $order): bool
+    {
+        return in_array($user->role_id, [1, 2, 3]);
+    }
+
+    /**
+     * Determine whether the user can updatePrices the model.
+     * (Сделано для того, чтобы только менеджер или админ мог поменять: Кол-во товара.
+     * Никто кроме 2-ух человек не может этого сделать)
+     */
+    public function updateQuantity(User $user, Order $order): bool
     {
         return $user->id === $order->user_id || $user->role_id === 1;
     }
