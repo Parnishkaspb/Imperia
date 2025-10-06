@@ -69,6 +69,7 @@
                 <th>Ширина</th>
                 <th>Высота</th>
                 <th>Вес</th>
+                <th>Общий вес</th>
                 <th>Объем</th>
                 <th>Кол-во</th>
                 <th>Цена закупки</th>
@@ -158,6 +159,11 @@
                     </td>
                     <td>
                         {{ $product['weight'] }}кг
+                    </td>
+                    <td>
+                        {{ $product['weight'] * $product['quantity'] }}кг
+                        <br>
+                        {{ ($product['weight'] * $product['quantity']) / 20000 }} -- Кол-во фур 20т
                     </td>
                     <td>
                         {{ $product['concrete_volume'] }}
