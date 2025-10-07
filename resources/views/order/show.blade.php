@@ -74,7 +74,6 @@
                 <th>Кол-во</th>
                 <th>Цена закупки</th>
                 <th>Цена реализации</th>
-                @can('updatePrices', $order)
                 @isset($manufactures["th"][$category->id])
                 @foreach($manufactures["th"][$category->id] as $manufacture_id => $value)
                     <th>
@@ -93,6 +92,7 @@
                             </svg>
                         </span>
 
+                        @can('updatePrices', $order)
                         <form action="{{ route('order.delete.sm', [$order->id, 18, $value['delete_id']]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить производителя?');">
                             @csrf
                             @method('DELETE')
@@ -112,6 +112,7 @@
                                 </svg>
                             </button>
                         </form>
+                        @endcan
 {{--                        <span onclick="return delete_sm({{ $manufacture['id_update'] }}, {{ $manufacture['id_update'] }}, 18);">--}}
 {{--                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">--}}
 {{--                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>--}}
@@ -120,7 +121,6 @@
                     </th>
                 @endforeach
                 @endisset
-                @endcan
             </tr>
             </thead>
             <tbody>
@@ -185,7 +185,6 @@
                         <br><input type="number" class="money" disabled="disabled" value="{{$product['selling_price'] * $product['quantity']}}">
                     </td>
 
-                    @can('updatePrices', $order)
                         @isset($manufactures["body"][$category->id][$product['id']])
                             @foreach($manufactures["body"][$category->id][$product['id']] as $manufacture_id => $value)
                                 <td>
@@ -198,7 +197,6 @@
                                 </td>
                             @endforeach
                         @endisset
-                    @endcan
 
                         <?php
                         $totalBuy += $product['buying_price'] * $product['quantity'];
