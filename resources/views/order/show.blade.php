@@ -181,7 +181,8 @@
                     </td>
 
                     <td>
-                        <input type="number" class="money" @can('updatePrices', $order) onfocusout="update(this.value, {{ $product['id'] }}, 4)" @else disabled="disabled" @endcan min='1' value="{{$product['selling_price']}}">
+                        @can('updatePrices', $order) <input type="number" class="money" onfocusout="update(this.value, {{ $product['id'] }}, 4)" min='1' value="{{$product['selling_price']}}">  @endcan
+                        @can('updateQuantity', $order) <input type="number" class="money" onfocusout="update(this.value, {{ $product['id'] }}, 4)"  min='1' value="{{$product['selling_price']}}">@endcan
                         <br><input type="number" class="money" disabled="disabled" value="{{$product['selling_price'] * $product['quantity']}}">
                     </td>
 
