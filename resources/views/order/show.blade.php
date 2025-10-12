@@ -149,6 +149,7 @@
                             </button>
                         </form>
                         @endcan
+                        <p style="margin: 0px;"> Нагрузка: </p> <input type="text" @can('updateQuantity', $order) onfocusout="update(this.value, {{ $product['id'] }}, 21, {{ $manufacture_id }})" @else disabled="disabled" @endcan value="{{ $product['comment'] ?? "" }}">
                     </td>
                     <td>
                         {{ $product['length'] }}

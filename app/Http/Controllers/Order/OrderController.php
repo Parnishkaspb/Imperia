@@ -62,18 +62,18 @@ class OrderController extends Controller
             if (!$product) return null;
 
             return [
-                'category_id' => $product->category_id,
-                'name' => $product->name,
-                'id' => $product->id,
-                'quantity' => $orderProduct->quantity,
-                'buying_price' => $orderProduct->buying_price,
-                'selling_price' => $orderProduct->selling_price,
-                'weight' => $product->weight,
-                'length' => $product->length,
-                'width' => $product->width,
-                'height' => $product->height,
+                'category_id'     => $product->category_id,
+                'name'            => $product->name,
+                'id'              => $product->id,
+                'quantity'        => $orderProduct->quantity,
+                'buying_price'    => $orderProduct->buying_price,
+                'selling_price'   => $orderProduct->selling_price,
+                'weight'          => $product->weight,
+                'length'          => $product->length,
+                'width'           => $product->width,
+                'height'          => $product->height,
                 'concrete_volume' => $product->concrete_volume,
-
+                'comment'         => $orderProduct->comment,
             ];
         })->filter()->values() ?? [];
 
@@ -179,13 +179,15 @@ class OrderController extends Controller
             case 2:
             case 3:
             case 4:
+            case 21:
                 $key = match ((int) $request->what){
-                    2 => "quantity",
-                    3 => "buying_price",
-                    4 => "selling_price",
+                    2  => "quantity",
+                    3  => "buying_price",
+                    4  => "selling_price",
+                    21 => "comment"
                 };
 
-                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update([$key => (int) $request->value]);
+                OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update([$key => $request->value]);
 
                 break;
 
