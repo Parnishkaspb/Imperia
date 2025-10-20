@@ -533,7 +533,7 @@ class OrderController extends Controller
         $tempPath = tempnam(sys_get_temp_dir(), 'document_') . '.docx';
         $document->saveAs($tempPath);
 
-        return response()->download($tempPath, 'Заказ№ '.$order->id.' от '. $date . '.docx')->deleteFileAfterSend(true);
+        return response()->download($tempPath, 'Заказ№'.$order->id.' от '. $date . '.docx')->deleteFileAfterSend(true);
     }
 
     private function infoProducts($products): array
