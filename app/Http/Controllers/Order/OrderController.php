@@ -12,6 +12,7 @@ use App\Models\OrderProduct;
 use App\Models\OrderStatus;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ExcelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -441,5 +442,42 @@ class OrderController extends Controller
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()]);
         }
+    }
+
+
+    public function export(Order $order, ExcelService $excelService)
+    {
+        $order->load('orderProducts.product');
+
+        $year = (int) date("Y", strtotime(now()->timestamp));
+        if ($year <= 2025){
+            $nds = (int) config('app.NDS_2025');
+        }
+
+        $products = $order?->orderProducts?->map(function($product) use ($nds) {
+            return [
+                $product->product->name,
+                $product->product->gost,
+                $product->product->weight,
+                $product->quantity,
+                $product->selling_price,
+                $product->selling_price * $product->quantity,
+                $this->summWithNDS($product->selling_price * $product->quantity, $nds),
+            ];
+        })->toArray();
+
+        $header = [
+            'Название', 'ГОСТ', 'Вес', 'Количество', 'Реализация', 'Общая реализации', 'Общая реализация С НДС',
+        ];
+
+        $data = array_merge($header, $products);
+
+        dd($data);
+
+    }
+
+    private function summWithNDS($sum, $nds): float
+    {
+        return $sum * $nds / ($nds + 100);
     }
 }

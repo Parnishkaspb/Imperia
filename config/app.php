@@ -124,8 +124,5 @@ return [
     ],
 
 
-    'providers' => [
-        App\Providers\ExcelServiceProvider::class,
-    ],
-
+    'NDS_2025' => env('NDS_2025', 20),
 ];

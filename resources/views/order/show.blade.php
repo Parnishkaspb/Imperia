@@ -18,6 +18,8 @@
                 </option>
             @endforeach
         </select>
+
+        <button onclick="" class="btn btn-outline-warning"> Создать Excel </button>
     </div>
 
 
