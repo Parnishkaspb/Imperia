@@ -454,26 +454,46 @@ class OrderController extends Controller
             $nds = (int) config('app.NDS_2025');
         }
 
-        $products = $order?->orderProducts?->map(function($product) use ($nds) {
+        $priceWithNDS  = 0;
+        $totalProducts = 0;
+
+        $products = $order?->orderProducts?->map(function($product) use ($nds, &$priceWithNDS, &$totalProducts) {
+            $total = $product->selling_price * $product->quantity;
+            $totalWithNDS = $total + $this->summWithNDS($total, $nds);
+            $priceWithNDS += $totalWithNDS;
+
+            $totalProducts += $product->quantity;
+
             return [
                 $product->product->name,
                 $product->product->gost,
                 $product->product->weight,
                 $product->quantity,
                 $product->selling_price,
-                $product->selling_price * $product->quantity,
-                $this->summWithNDS($product->selling_price * $product->quantity, $nds),
+                $total,
+                $totalWithNDS,
             ];
         })->toArray();
 
-        $header = [
-            'Название', 'ГОСТ', 'Вес', 'Количество', 'Реализация', 'Общая реализации', 'Общая реализация С НДС',
+        $orderHeader = [
+            ["Заказ №{$order->id}"],
+            ["Дата: " . $order->created_at->format('d.m.Y')],
+            [],
         ];
 
-        $data = array_merge($header, $products);
+        $tableHeader = [
+            ['Название', 'ГОСТ', 'Вес', 'Количество', 'Цена', 'Сумма', 'Сумма с НДС'],
+        ];
 
-        dd($data);
+        $footer = [
+            [],
+            ['Общая сумма с НДС:', '', '', '', '', '', $priceWithNDS],
+            ['Общая кол-во продукции:', '', '', '', '', '', $totalProducts],
+        ];
 
+        $data = array_merge($orderHeader, $tableHeader, $products, $footer);
+
+        return $excelService->export($data, "Заказ" . $order->id . ".xlsx");
     }
 
     private function summWithNDS($sum, $nds): float
