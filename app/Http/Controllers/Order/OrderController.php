@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class OrderController extends Controller
 {
@@ -444,36 +446,33 @@ class OrderController extends Controller
         }
     }
 
-
     public function export(Order $order, ExcelService $excelService)
     {
         $order->load('orderProducts.product');
 
-        $year = (int) date("Y", strtotime(now()->timestamp));
-        if ($year <= 2025){
-            $nds = (int) config('app.NDS_2025');
-        }
 
-        $priceWithNDS  = 0;
-        $totalProducts = 0;
+        [$products, $totalProducts, $priceWithNDS] = $this->infoProducts($order?->orderProducts);
 
-        $products = $order?->orderProducts?->map(function($product) use ($nds, &$priceWithNDS, &$totalProducts) {
-            $total = $product->selling_price * $product->quantity;
-            $totalWithNDS = $total + $this->summWithNDS($total, $nds);
-            $priceWithNDS += $totalWithNDS;
-
-            $totalProducts += $product->quantity;
-
-            return [
-                $product->product->name,
-                $product->product->gost,
-                $product->product->weight,
-                $product->quantity,
-                $product->selling_price,
-                $total,
-                $totalWithNDS,
-            ];
-        })->toArray();
+//        $priceWithNDS  = 0;
+//        $totalProducts = 0;
+//
+//        $products = $order?->orderProducts?->map(function($product) use (&$priceWithNDS, &$totalProducts) {
+//            $total = $product->selling_price * $product->quantity;
+//            $totalWithNDS = $total + $this->summWithNDS($total);
+//            $priceWithNDS += $totalWithNDS;
+//
+//            $totalProducts += $product->quantity;
+//
+//            return [
+//                $product->product->name,
+//                $product->product->gost,
+//                $product->product->weight,
+//                $product->quantity,
+//                $product->selling_price,
+//                $total,
+//                $totalWithNDS,
+//            ];
+//        })->toArray();
 
         $orderHeader = [
             ["Заказ №{$order->id}"],
@@ -496,8 +495,90 @@ class OrderController extends Controller
         return $excelService->export($data, "Заказ" . $order->id . ".xlsx");
     }
 
-    private function summWithNDS($sum, $nds): float
+    public function word(Order $order)
     {
+        if (!Storage::disk('public')->exists('document_template/template.docx')) {
+            throw new \Exception('Шаблон не найден');
+        }
+
+        $order->load('orderProducts.product');
+
+        [$products, $totalProducts, $totalPriceWithNDS] = $this->infoProducts($order?->orderProducts);
+        unset($totalProducts);
+
+        $date = date("d.m.Y", now()->timestamp);
+
+        $templatePath = Storage::disk('public')->path('document_template/template.docx');
+
+        $document = new TemplateProcessor($templatePath);
+
+        $document->setValue("manager", Auth::user()->surname . " ". Auth::user()->name);
+        $document->setValue("manager_email", Auth::user()->email);
+        $document->setValue("id", $order->id);
+        $document->setValue("date", $date);
+
+        $document->setValue("total", $this->formatedNumber($totalPriceWithNDS));
+        $document->cloneRow('product', count($products));
+
+        $counter = 1;
+        foreach ($products as $product) {
+            $document->setValue("product#" . ($counter)             , $product[0] . " " . $product[1]);
+            $document->setValue("product_count#" . ($counter)       , $product[3]);
+            $document->setValue("product_price#" . ($counter)       , $this->formatedNumber($product[5]));
+            $document->setValue("product_total_price#" . ($counter) , $this->formatedNumber($product[6]));
+
+            $counter++;
+        }
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'document_') . '.docx';
+        $document->saveAs($tempPath);
+
+        return response()->download($tempPath, 'Заказ№ '.$order->id.'от '. $date . '.docx')->deleteFileAfterSend(true);
+    }
+
+    private function infoProducts($products): array
+    {
+        $priceWithNDS  = 0;
+        $totalProducts = 0;
+
+        $data = $products?->map(function($product) use (&$priceWithNDS, &$totalProducts) {
+            $total = $product->selling_price * $product->quantity;
+            $totalWithNDS = $total + $this->summWithNDS($total);
+            $priceWithNDS += $totalWithNDS;
+
+            $totalProducts += $product->quantity;
+
+            return [
+                $product->product->name,
+                $product->product->gost,
+                $product->product->weight,
+                $product->quantity,
+                $product->selling_price,
+                $total,
+                $totalWithNDS,
+            ];
+        })->toArray();
+
+        return [
+            $data,
+            $totalProducts,
+            $priceWithNDS,
+        ];
+    }
+
+    private function summWithNDS($sum): float
+    {
+        $year = (int) date("Y", strtotime(now()->timestamp));
+        $nds  = 20;
+        if ($year <= 2025){
+            $nds = (int) config('app.NDS_2025');
+        }
+
         return $sum * $nds / ($nds + 100);
+    }
+
+    private function formatedNumber($number): string
+    {
+        return number_format($number, 2, '.', ' ');
     }
 }

@@ -166,6 +166,7 @@ Route::middleware(CheckIp::class)->group(function () {
                 Route::get('/{order}', 'show')->name('order.show');
 
                 Route::get('/export/{order}', 'export')->name('order.export');
+                Route::get('/word/{order}', 'word')->name('order.word');
 
                 Route::delete('/{order}/{what}/{value}', 'delete')->name('order.delete.sm');
                 Route::put('/{order}', 'update')->name('order.update.sm');
