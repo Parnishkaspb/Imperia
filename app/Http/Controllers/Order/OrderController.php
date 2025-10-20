@@ -524,7 +524,7 @@ class OrderController extends Controller
         foreach ($products as $product) {
             $document->setValue("product#" . ($counter)             , $product[0] . " " . $product[1]);
             $document->setValue("product_count#" . ($counter)       , $product[3]);
-            $document->setValue("product_price#" . ($counter)       , $this->formatedNumber($product[5]));
+            $document->setValue("product_price#" . ($counter)       , $this->formatedNumber($product[4]));
             $document->setValue("product_total_price#" . ($counter) , $this->formatedNumber($product[6]));
 
             $counter++;
@@ -533,7 +533,7 @@ class OrderController extends Controller
         $tempPath = tempnam(sys_get_temp_dir(), 'document_') . '.docx';
         $document->saveAs($tempPath);
 
-        return response()->download($tempPath, 'Заказ№ '.$order->id.'от '. $date . '.docx')->deleteFileAfterSend(true);
+        return response()->download($tempPath, 'Заказ№ '.$order->id.' от '. $date . '.docx')->deleteFileAfterSend(true);
     }
 
     private function infoProducts($products): array
@@ -543,6 +543,7 @@ class OrderController extends Controller
 
         $data = $products?->map(function($product) use (&$priceWithNDS, &$totalProducts) {
             $total = $product->selling_price * $product->quantity;
+            $selling_price = $product->selling_price + $this->summWithNDS($product->selling_price);
             $totalWithNDS = $total + $this->summWithNDS($total);
             $priceWithNDS += $totalWithNDS;
 
@@ -553,7 +554,7 @@ class OrderController extends Controller
                 $product->product->gost,
                 $product->product->weight,
                 $product->quantity,
-                $product->selling_price,
+                $selling_price,
                 $total,
                 $totalWithNDS,
             ];
