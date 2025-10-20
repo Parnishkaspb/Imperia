@@ -19,9 +19,7 @@
             @endforeach
         </select>
 
-        @if (Auth::user()->role_id === 1)
-            <a href="{{route('order.export', $order->id) }}" onclick="setTimeout(() => window.close(), 500)" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>
-        @endif
+        <a href="{{route('order.export', $order->id) }}" onclick="setTimeout(() => window.close(), 500)" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>
     </div>
 
 
