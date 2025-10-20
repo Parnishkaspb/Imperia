@@ -19,7 +19,9 @@
             @endforeach
         </select>
 
-        <a href="{{route('order.export', $order->id) }}" onclick="setTimeout(() => window.close(), 500)" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>
+        <a href="{{route('order.export', $order->id) }}" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>
+
+        <a href="{{route('order.word', $order->id) }}" target="_blank" class="btn btn-outline-danger"> Создать КП </a>
     </div>
 
 
