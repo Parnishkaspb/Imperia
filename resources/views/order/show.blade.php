@@ -20,7 +20,8 @@
         </select>
 
         @if (Auth::user()->role_id === 1)
-        <a href="{{route('order.export', $order->id) }}" onclick="setTimeout(() => window.close(), 500)" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>
+{{--            <a href="{{route('order.export', $order->id) }}" onclick="setTimeout(() => window.close(), 500)" target="_blank" class="btn btn-outline-warning"> Создать Excel </a>--}}
+            <a href="{{route('order.export', $order->id) }}" class="btn btn-outline-warning"> Создать Excel </a>
         @endif
     </div>
 
