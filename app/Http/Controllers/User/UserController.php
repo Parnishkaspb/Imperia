@@ -66,10 +66,10 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        if (!Hash::check($request->password_old, $user->password)) {
-            return redirect()->route('user.show', $user->id)
-                ->with('passwordOld_error', 'Старый пароль не совпадает!');
-        }
+//        if (!Hash::check($request->password_old, $user->password)) {
+//            return redirect()->route('user.show', $user->id)
+//                ->with('passwordOld_error', 'Старый пароль не совпадает!');
+//        }
 
         $user->update([
             'password' => $request->password_new,
