@@ -13,6 +13,8 @@ class OrderProduct extends Model
         'quantity',
         'buying_price',
         'selling_price',
+        'load',
+        'comment',
     ];
 
     public $timestamps = false;

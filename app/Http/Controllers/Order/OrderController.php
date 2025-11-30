@@ -77,6 +77,7 @@ class OrderController extends Controller
                 'height'          => $product->height,
                 'concrete_volume' => $product->concrete_volume,
                 'comment'         => $orderProduct->comment,
+                'load'            => $orderProduct->load,
             ];
         })->filter()->values() ?? [];
 
@@ -183,11 +184,13 @@ class OrderController extends Controller
             case 3:
             case 4:
             case 21:
+            case 22:
                 $key = match ((int) $request->what){
                     2  => "quantity",
                     3  => "buying_price",
                     4  => "selling_price",
-                    21 => "comment"
+                    21 => "comment",
+                    22 => "load",
                 };
 
                 OrderProduct::where('order_id', $order->id)->where('product_id', (int) $request->product_id)->update([$key => $request->value]);

@@ -132,6 +132,7 @@
                 <tr>
                     <td>
                         {{ $product['name'] }}
+                        <input style="width: 80px" type="text" @can('updateQuantity', $order) onfocusout="update(this.value, {{ $product['id'] }}, 22, 0)" @else disabled="disabled" @endcan value="{{ $product['load'] ?? "" }}" >
                         @can('delete', $order)
                         <form action="{{ route('order.delete.sm', [$order->id, 16, $product['id']]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Удалить товар?');">
                             @csrf
@@ -153,7 +154,7 @@
                             </button>
                         </form>
                         @endcan
-                        <p style="margin: 0px;"> Нагрузка: </p> <input type="text" @can('updateQuantity', $order) onfocusout="update(this.value, {{ $product['id'] }}, 21, 0)" @else disabled="disabled" @endcan value="{{ $product['comment'] ?? "" }}">
+                        <p style="margin: 0px;"> Комментарий: </p> <input type="text" @can('updateQuantity', $order) onfocusout="update(this.value, {{ $product['id'] }}, 21, 0)" @else disabled="disabled" @endcan value="{{ $product['comment'] ?? "" }}">
                     </td>
                     <td>
                         {{ $product['length'] }}
