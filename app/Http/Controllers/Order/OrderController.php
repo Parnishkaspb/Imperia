@@ -484,7 +484,7 @@ class OrderController extends Controller
         ];
 
         $tableHeader = [
-            ['Название', 'ГОСТ', 'Вес', 'Количество', 'Цена', 'Сумма', 'Сумма с НДС'],
+            ['Название', 'ГОСТ', 'Вес', 'Количество', 'Цена', 'Сумма Без НДС', 'Сумма с НДС'],
         ];
 
         $footer = [
@@ -541,32 +541,34 @@ class OrderController extends Controller
 
     private function infoProducts($products): array
     {
-        $priceWithNDS  = 0;
-        $totalProducts = 0;
+        $sum           = 0;
+        $sumWithOutNDS = 0;
+        $countProducts = 0;
 
-        $data = $products?->map(function($product) use (&$priceWithNDS, &$totalProducts) {
-            $total = $product->selling_price * $product->quantity;
-            $selling_price = $product->selling_price + $this->summWithNDS($product->selling_price);
-            $totalWithNDS = $total + $this->summWithNDS($total);
-            $priceWithNDS += $totalWithNDS;
+        $data = $products?->map(function($product) use (&$sum, &$sumWithOutNDS, &$countProducts) {
+            $totalProductPrice           = $product->selling_price * $product->quantity;
+            $totalProductPriceWithoutNDS = $totalProductPrice - $this->summWithNDS($totalProductPrice);
 
-            $totalProducts += $product->quantity;
+
+            $countProducts               += $product->quantity;
+            $sum                         += $totalProductPrice;
+            $sumWithOutNDS               += $totalProductPriceWithoutNDS;
 
             return [
                 $product->product->name,
                 $product->product->gost,
                 $product->product->weight,
                 $product->quantity,
-                $selling_price,
-                $total,
-                $totalWithNDS,
+                $product->selling_price,
+                $totalProductPriceWithoutNDS,
+                $totalProductPrice,
             ];
         })->toArray();
 
         return [
             $data,
-            $totalProducts,
-            $priceWithNDS,
+            $countProducts,
+            $sum,
         ];
     }
 

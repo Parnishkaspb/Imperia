@@ -9,7 +9,7 @@ class Category extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['name', 'namewithout'];
+    protected $fillable = ['name', 'namewithout', 'parentid'];
 
     public function products(): HasMany
     {

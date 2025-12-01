@@ -115,11 +115,14 @@ Route::middleware(CheckIp::class)->group(function () {
             Route::controller(ProductController::class)->group(function () {
                 Route::get('/product/{product}', 'show')->name('edit.show.product');
                 Route::put('/product/{product}', 'update')->name('edit.update.product');
+//                Route::post('/product/{product}', 'update')->name('edit.update.product');
             });
 
             Route::controller(CategoryController::class)->group(function () {
+                Route::get('/category_create', 'index')->name('edit.index.category');
                 Route::get('/category/{category}', 'show')->name('edit.show.category');
                 Route::put('/category/{category}', 'update')->name('edit.update.category');
+                Route::post('/category', 'store')->name('edit.store.category');
             });
         });
     });

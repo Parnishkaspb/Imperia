@@ -45,6 +45,12 @@
                         </li>
                     @endif
 
+{{--                    @if(Auth::user()->role_id == 1)--}}
+{{--                        <li class="nav-item">--}}
+{{--                            <a class="nav-link" href="{{ route('edit.index.category') }}">Добавить категорию</a>--}}
+{{--                        </li>--}}
+{{--                    @endif--}}
+
                     @if(Auth::user()->role_id !== 6)
                         <li class="nav-item">
                             <a class="nav-link" href="/order">Заказы</a>
